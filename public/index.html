@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jagan1 - Cooperative Gig Services Platform</title>
+  <meta name="description" content="Jagan1 (jagan1.com) - Worker-owned cooperative platform connecting local households with verified service professionals.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#1E40AF',
+              primaryLight: '#3B82F6',
+              secondary: '#0D9488',
+              accent: '#F59E0B',
+              emergency: '#EF4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- SAMPLE DATA ---
+    const CITIES = ["Bengaluru", "Ballari", "Mysuru", "Tumakuru"];
+
+    const CATEGORIES = [
+      { id: "plumbing", name: "Plumbing", group: "Home Repair", icon: "wrench", startingPrice: 299, rating: 4.8, pros: 34, emergency: true, desc: "Pipe leaks, tap repairs, blockage & water pumps", problems: ["Pipe leakage & burst lines", "Broken tap/shower", "Drain/toilet blockage", "Overhead tank leak"] },
+      { id: "electrical", name: "Electrical", group: "Home Repair", icon: "zap", startingPrice: 249, rating: 4.9, pros: 28, emergency: true, desc: "Short circuits, wiring, switchboards & MCB tripping", problems: ["Switchboard sparking", "MCB tripped continuously", "Ceiling fan installation", "Inverter battery wiring"] },
+      { id: "carpentry", name: "Carpentry", group: "Home Repair", icon: "hammer", startingPrice: 349, rating: 4.7, pros: 22, emergency: false, desc: "Door repair, locks, custom shelves & hinge fixes", problems: ["Broken door latch", "Jammed drawer slider", "Lock replacement", "Bed assembly"] },
+      { id: "painting", name: "Painting", group: "Home Repair", icon: "paint-brush", startingPrice: 799, rating: 4.7, pros: 18, emergency: false, desc: "Waterproofing, touchups & full interior painting", problems: ["Damp wall seepage", "Accent wall painting", "Door enamel polishing"] },
+      { id: "appliance", name: "Appliance Repair", group: "Home Repair", icon: "tv", startingPrice: 399, rating: 4.8, pros: 26, emergency: true, desc: "Washing machines, fridge, microwave & geyser", problems: ["Washing machine vibration", "Fridge not cooling", "Geyser no hot water"] },
+      { id: "ac_repair", name: "AC Repair & Jet Foam", group: "Home Repair", icon: "wind", startingPrice: 499, rating: 4.9, pros: 31, emergency: true, desc: "Cooling diagnostics, gas refilling & jet wash", problems: ["AC blowing warm air", "Indoor unit water leak", "Refrigerant gas refill"] },
+      { id: "cleaning", name: "Deep Home Cleaning", group: "Home Services", icon: "sparkles", startingPrice: 599, rating: 4.9, pros: 42, emergency: false, desc: "Kitchen, bathroom, sofa extraction & sanitization", problems: ["Hard water bathroom scale", "Kitchen chimney grease", "Sofa deep vacuuming"] },
+      { id: "pest", name: "Pest Control", group: "Home Services", icon: "shield-alert", startingPrice: 699, rating: 4.7, pros: 15, emergency: false, desc: "Termite, cockroach, bedbug & odorless herbal gel", problems: ["Kitchen cockroach gel", "Termite wood injection", "Bedbug heat treatment"] },
+      { id: "delivery", name: "Local Courier & Delivery", group: "Community Services", icon: "truck", startingPrice: 99, rating: 4.9, pros: 38, emergency: true, desc: "Urgent package pickups, medicines & key drops in 30 mins", problems: ["Urgent medicine delivery", "Forgot keys/charger", "Warm tiffin delivery"] },
+      { id: "elderly", name: "Elderly Companion & Help", group: "Community Services", icon: "heart-handshake", startingPrice: 299, rating: 5.0, pros: 14, emergency: true, desc: "Doctor visits, medication assistance & grocery walks", problems: ["Hospital escort", "Medication schedule companion", "Weekly grocery walk"] },
+      { id: "helper", name: "On-Demand Helper / Cook", group: "Community Services", icon: "coffee", startingPrice: 249, rating: 4.7, pros: 25, emergency: true, desc: "Emergency meal cooking, dishwashing & substitute maid", problems: ["Maid on emergency leave", "Homestyle dinner cooking", "Post-gathering dish clean"] }
+    ];
+
+    const PROFESSIONALS = [
+      { id: "pro_ramesh", name: "Ramesh Kumar", service: "Plumbing", city: "Bengaluru", rating: 4.9, reviews: 142, jobs: 186, exp: 8, distance: 1.2, price: 299, available: true, phone: "+91 98450 21345", verified: true, skills: ["Leak Detection", "CPVC Piping", "Pressure Pumps"], area: "Koramangala, HSR Layout, BTM", about: "Cooperative member for 3 years. Certified master plumber with complete tools for instant leak stoppage." },
+      { id: "pro_rajesh", name: "Rajesh Gowda", service: "Electrical", city: "Bengaluru", rating: 4.95, reviews: 210, jobs: 275, exp: 10, distance: 1.5, price: 249, available: true, phone: "+91 99801 34112", verified: true, skills: ["Short Circuits", "MCB Tripping", "Inverters"], area: "Jayanagar, JP Nagar, Banashankari", about: "Licensed wireman carrying insulated safety gear and multimeter for emergency power faults." },
+      { id: "pro_priya", name: "Priya Sharma", service: "Deep Home Cleaning", city: "Bengaluru", rating: 4.95, reviews: 230, jobs: 310, exp: 5, distance: 2.1, price: 599, available: true, phone: "+91 98110 55432", verified: true, skills: ["Steam Cleaning", "Kitchen Grease", "Hard Water Descaling"], area: "Electronic City, HSR", about: "Leads a women-owned cooperative cleaning team with German biodegradable cleaners." },
+      { id: "pro_karthik", name: "Karthik Subramanian", service: "AC Repair & Jet Foam", city: "Bengaluru", rating: 4.9, reviews: 160, jobs: 215, exp: 7, distance: 1.9, price: 499, available: true, phone: "+91 98401 99234", verified: true, skills: ["Jet Foam Wash", "Gas Refill", "Inverter PCB"], area: "Bellandur, Sarjapur Road", about: "Certified HVAC specialist ensuring 100% cooling restoration with digital temp diagnostics." },
+      { id: "pro_deepak", name: "Deepak Somanna", service: "Local Courier & Delivery", city: "Bengaluru", rating: 4.9, reviews: 340, jobs: 450, exp: 3, distance: 0.8, price: 99, available: true, phone: "+91 99002 11984", verified: true, skills: ["20-min Pickup", "OTP Secure", "Medicine Delivery"], area: "Central Bengaluru", about: "Fast community delivery lead on two-wheeler with insulated delivery bag." },
+      { id: "pro_veeranna", name: "Veeranna Bellary", service: "Plumbing", city: "Ballari", rating: 4.85, reviews: 89, jobs: 115, exp: 11, distance: 1.1, price: 249, available: true, phone: "+91 98442 88120", verified: true, skills: ["Borewell Line", "CPVC", "Water Tanks"], area: "Cowl Bazaar, Gandhi Nagar", about: "Ballari cooperative member with expertise in high-mineral water anti-scaling plumbing." },
+      { id: "pro_gangadhar", name: "Gangadhar Swamy", service: "Plumbing", city: "Mysuru", rating: 4.9, reviews: 118, jobs: 152, exp: 12, distance: 1.6, price: 280, available: true, phone: "+91 98801 77234", verified: true, skills: ["Heritage Homes", "Solar Water Line", "Pressure Boosters"], area: "Gokulam, Jayalakshmipuram", about: "Mysuru artisan known for thorough plumbing work and solar water heater lines." },
+      { id: "pro_chethan", name: "Chethan Kumar", service: "Electrical", city: "Tumakuru", rating: 4.85, reviews: 72, jobs: 90, exp: 6, distance: 1.3, price: 220, available: true, phone: "+91 97430 11200", verified: true, skills: ["Domestic Wiring", "Motor Starters", "Inverters"], area: "SS Puram, Ashok Nagar", about: "Dependable local wireman with prompt emergency response across Tumakuru." }
+    ];
+
+    const INITIAL_BOOKINGS = [
+      {
+        id: "BK-8421",
+        customerName: "Aditi Sharma",
+        proId: "pro_ramesh",
+        proName: "Ramesh Kumar",
+        service: "Plumbing",
+        problem: "Kitchen sink drain pipe burst and water leaking onto floor",
+        date: "Today",
+        time: "Immediate (Emergency)",
+        address: "#42, 3rd Cross, Koramangala 4th Block, Bengaluru",
+        status: "On the Way",
+        amount: 383,
+        paymentStatus: "Paid",
+        eta: 12,
+        dist: 1.2
+      },
+      {
+        id: "BK-8419",
+        customerName: "Aditi Sharma",
+        proId: "pro_rajesh",
+        proName: "Rajesh Gowda",
+        service: "Electrical",
+        problem: "Living room switchboard sparking occasionally",
+        date: "Tomorrow",
+        time: "10:00 AM - 11:30 AM",
+        address: "#42, 3rd Cross, Koramangala 4th Block, Bengaluru",
+        status: "Accepted",
+        amount: 273,
+        paymentStatus: "Pending",
+        eta: 45,
+        dist: 2.5
+      }
+    ];
+
+    const INITIAL_MESSAGES = [
+      { id: 1, sender: "customer", text: "Hi Ramesh, the kitchen water pipe under the sink has a crack and water is pooling on the kitchen tiles.", time: "10:20 AM", status: "read" },
+      { id: 2, sender: "pro", text: "Namaskara Aditi ji! Please turn off the angle valve under the sink or your main inlet right away to prevent floor damage.", time: "10:21 AM", status: "read" },
+      { id: 3, sender: "customer", text: "Yes, I just closed the angle valve. The leak has slowed down now.", time: "10:22 AM", status: "read" },
+      { id: 4, sender: "pro", text: "Great! I have packed high-grade CPVC couplers and braided inlet hose. I am on my bike, reaching in about 12 minutes.", time: "10:23 AM", status: "read" },
+      { id: 5, sender: "customer", text: "Thank you! Flat 302, 3rd floor. Security has been informed.", time: "10:24 AM", status: "delivered" }
+    ];
+
+    function App() {
+      const [currentRoute, setCurrentRoute] = useState("home");
+      const [city, setCity] = useState("Bengaluru");
+      const [role, setRole] = useState("CUSTOMER"); // "CUSTOMER", "PRO", "ADMIN"
+      const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
+      const [messages, setMessages] = useState(INITIAL_MESSAGES);
+      const [activeChatBooking, setActiveChatBooking] = useState(INITIAL_BOOKINGS[0]);
+      const [isTyping, setIsTyping] = useState(false);
+      const [chatInput, setChatInput] = useState("");
+      
+      // Flow states
+      const [aiQuery, setAiQuery] = useState("");
+      const [aiDiagnosis, setAiDiagnosis] = useState(null);
+      const [selectedPro, setSelectedPro] = useState(PROFESSIONALS[0]);
+      const [selectedCategory, setSelectedCategory] = useState(null);
+      const [bookingStep, setBookingStep] = useState(1);
+      const [bookingService, setBookingService] = useState("plumbing");
+      const [bookingProblem, setBookingProblem] = useState("");
+      const [bookingDate, setBookingDate] = useState("Today");
+      const [bookingTime, setBookingTime] = useState("Immediate (within 30 mins)");
+      const [bookingAddress, setBookingAddress] = useState("#42, 3rd Cross, Koramangala, Bengaluru");
+      const [bookingPayNow, setBookingPayNow] = useState(true);
+      const [latestBookingId, setLatestBookingId] = useState("BK-8421");
+      const [reviewModal, setReviewModal] = useState(false);
+      const [reviewScore, setReviewScore] = useState(5);
+      const [reviewText, setReviewText] = useState("");
+      const [showNotifications, setShowNotifications] = useState(false);
+      const [trackingBooking, setTrackingBooking] = useState(INITIAL_BOOKINGS[0]);
+
+      // Profile Editor state
+      const [userName, setUserName] = useState("Aditi Sharma");
+      const [userPhone, setUserPhone] = useState("+91 98200 44521");
+      const [userAddress, setUserAddress] = useState("#42, 3rd Cross, Koramangala 4th Block, Bengaluru");
+      const [userEmergencyContact, setUserEmergencyContact] = useState("+91 94480 12890");
+      const [proHours, setProHours] = useState("7:00 AM - 9:00 PM (Emergency 24x7)");
+      const [proAreas, setProAreas] = useState("Koramangala, HSR Layout, BTM Layout, Indiranagar");
+      const [proRate, setProRate] = useState(299);
+      const [proOnline, setProOnline] = useState(true);
+      const [profileToast, setProfileToast] = useState(false);
+
+      // AI diagnosis helper
+      const runAiDiagnosis = (query) => {
+        const q = (query || aiQuery).toLowerCase();
+        let result = null;
+        if (q.includes("pipe") || q.includes("leak") || q.includes("water") || q.includes("tap") || q.includes("drain") || q.includes("plumb")) {
+          result = {
+            category: "Plumbing Service",
+            serviceId: "plumbing",
+            problems: ["Ruptured CPVC pipe / joint leak", "Water damage hazard", "Pressure seal failure"],
+            suggestedAction: "Shut off the main inlet valve immediately to prevent floor seepage. We've matched emergency plumbers within 2 km.",
+            urgency: "HIGH - Emergency",
+            followUp: "Where is the leak located?",
+            options: ["Under kitchen sink", "Bathroom shower/faucet", "Main water meter pipe", "Ceiling dampness"],
+            pros: PROFESSIONALS.filter(p => p.service === "Plumbing")
+          };
+        } else if (q.includes("spark") || q.includes("shock") || q.includes("wire") || q.includes("mcb") || q.includes("switch") || q.includes("electric")) {
+          result = {
+            category: "Electrical Emergency",
+            serviceId: "electrical",
+            problems: ["Terminal sparking", "Circuit overload", "Fire hazard risk"],
+            suggestedAction: "⚠️ Do not touch the switchboard with wet hands. Trip your main MCB breaker if sparking continues.",
+            urgency: "HIGH - Emergency",
+            followUp: "Is the circuit breaker tripping continuously?",
+            options: ["Yes, main MCB trips", "Occasional sparking only", "Burning plastic smell"],
+            pros: PROFESSIONALS.filter(p => p.service === "Electrical")
+          };
+        } else if (q.includes("ac") || q.includes("cool")) {
+          result = {
+            category: "AC Repair & Jet Foam",
+            serviceId: "ac_repair",
+            problems: ["Refrigerant gas low", "Condenser choke", "Filter dust buildup"],
+            suggestedAction: "A foam jet deep wash with pressure probe check will restore 100% cooling within 45 mins.",
+            urgency: "STANDARD",
+            followUp: "What type of AC do you have?",
+            options: ["Split AC (1.5 / 2 Ton)", "Window AC", "Inverter AC with error code"],
+            pros: PROFESSIONALS.filter(p => p.service.includes("AC"))
+          };
+        } else {
+          result = {
+            category: "Deep Home Cleaning",
+            serviceId: "cleaning",
+            problems: ["Hard water scale", "Kitchen grease", "Upholstery stains"],
+            suggestedAction: "Cooperative cleaning team arrives with industrial steamers and eco-safe descaling solutions.",
+            urgency: "STANDARD",
+            followUp: "Which area needs priority cleaning?",
+            options: ["Full House (2BHK/3BHK)", "Kitchen & Chimney", "Bathrooms only", "Sofa & Carpet"],
+            pros: PROFESSIONALS.filter(p => p.service.includes("Cleaning"))
+          };
+        }
+        setAiDiagnosis(result);
+        setCurrentRoute("ai_assistant");
+      };
+
+      // Real-time Chat message sender
+      const sendChatMessage = (text) => {
+        const msgText = text || chatInput;
+        if (!msgText.trim()) return;
+        const newMsg = {
+          id: Date.now(),
+          sender: "customer",
+          text: msgText.trim(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: "sent"
+        };
+        setMessages(prev => [...prev, newMsg]);
+        setChatInput("");
+
+        // Simulate read receipts & pro typing response
+        setTimeout(() => {
+          setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: "delivered" } : m));
+        }, 600);
+
+        setTimeout(() => {
+          setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: "read" } : m));
+          setIsTyping(true);
+        }, 1200);
+
+        setTimeout(() => {
+          setIsTyping(false);
+          const replies = [
+            "Yes, I am en route on my scooter. Arriving in approximately 10-12 minutes.",
+            "Understood! I will show my Cooperative ID at the security gate.",
+            "Don't worry, I have brought all standard replacement parts and tools.",
+            "Standard cooperative rates apply with zero surge pricing."
+          ];
+          const autoReply = {
+            id: Date.now() + 1,
+            sender: "pro",
+            text: replies[Math.floor(Math.random() * replies.length)],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: "read"
+          };
+          setMessages(prev => [...prev, autoReply]);
+        }, 2600);
+      };
+
+      // Advance tracking demo
+      const advanceTracking = () => {
+        const statuses = ["Requested", "Accepted", "On the Way", "Arrived", "Service Started", "Completed"];
+        const currIdx = statuses.indexOf(trackingBooking.status);
+        const nextStatus = statuses[Math.min(currIdx + 1, statuses.length - 1)];
+        const updated = {
+          ...trackingBooking,
+          status: nextStatus,
+          eta: nextStatus === "Arrived" || nextStatus === "Service Started" || nextStatus === "Completed" ? 0 : Math.max(0, trackingBooking.eta - 6),
+          dist: nextStatus === "Arrived" || nextStatus === "Service Started" || nextStatus === "Completed" ? 0.0 : Math.max(0.2, trackingBooking.dist - 0.5)
+        };
+        setTrackingBooking(updated);
+        setBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+        if (nextStatus === "Completed") {
+          setReviewModal(true);
+        }
+      };
+
+      // Confirm Booking
+      const confirmBooking = () => {
+        const newId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
+        const newBook = {
+          id: newId,
+          customerName: "Aditi Sharma",
+          proId: selectedPro.id,
+          proName: selectedPro.name,
+          service: selectedPro.service,
+          problem: bookingProblem || "Cooperative service request",
+          date: bookingDate,
+          time: bookingTime,
+          address: bookingAddress,
+          status: bookingPayNow ? "Accepted" : "Requested",
+          amount: selectedPro.price + 29 + Math.floor(selectedPro.price * 0.18) - 50,
+          paymentStatus: bookingPayNow ? "Paid" : "Pending",
+          eta: 18,
+          dist: selectedPro.distance
+        };
+        setBookings(prev => [newBook, ...prev]);
+        setTrackingBooking(newBook);
+        setActiveChatBooking(newBook);
+        setLatestBookingId(newId);
+        setCurrentRoute("track_service");
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 pb-20 md:pb-0">
+          
+          {/* HEADER */}
+          <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 shadow-xs">
+            <div className="max-w-6xl mx-auto flex items-center justify-between">
+              
+              {/* Logo */}
+              <div onClick={() => setCurrentRoute("home")} className="flex items-center gap-2 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-teal-500 flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
+                  🤝
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-slate-900 text-lg leading-tight tracking-tight">Jagan1</span>
+                    <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded">jagan1.com</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">Domain: jagan1 • Direct worker payouts</p>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center gap-2 sm:gap-4">
+                {/* City Picker */}
+                <div className="relative">
+                  <select 
+                    value={city} 
+                    onChange={e => setCity(e.target.value)}
+                    className="bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  >
+                    {CITIES.map(c => <option key={c} value={c}>📍 {c}</option>)}
+                  </select>
+                </div>
+
+                {/* Role Switcher */}
+                <button 
+                  onClick={() => setRole(role === "CUSTOMER" ? "PRO" : role === "PRO" ? "ADMIN" : "CUSTOMER")}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition flex items-center gap-1.5 ${
+                    role === "PRO" ? "bg-amber-100 text-amber-800 border-amber-300" :
+                    role === "ADMIN" ? "bg-rose-100 text-rose-800 border-rose-300" :
+                    "bg-blue-50 text-blue-700 border-blue-200"
+                  }`}
+                >
+                  <span>{role === "PRO" ? "👷 Pro Mode" : role === "ADMIN" ? "🛡️ Admin" : "👤 Customer"}</span>
+                  <span className="text-[10px] opacity-60">⇄</span>
+                </button>
+
+                {/* Notifications */}
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition"
+                >
+                  <span className="text-lg">🔔</span>
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+                </button>
+
+                {/* Profile Editor Button */}
+                <button 
+                  onClick={() => setCurrentRoute("profile_editor")}
+                  className="w-8 h-8 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center hover:ring-2 hover:ring-blue-400 transition"
+                  title="Profile & Settings"
+                >
+                  {role === "PRO" ? "👷" : userName.charAt(0)}
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          {/* NOTIFICATION SHEET */}
+          {showNotifications && (
+            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex justify-end">
+              <div className="bg-white w-full max-w-sm h-full p-5 flex flex-col shadow-2xl">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                  <h3 className="font-bold text-slate-900 text-base">Platform Notifications</h3>
+                  <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-slate-700 text-lg">✕</button>
+                </div>
+                <div className="flex-1 overflow-y-auto space-y-3 py-4">
+                  <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <p className="text-xs font-bold text-blue-800">🛵 Professional On The Way</p>
+                    <p className="text-xs text-slate-600 mt-1">Ramesh Kumar is 1.2 km away for booking #{latestBookingId}.</p>
+                    <span className="text-[10px] text-slate-400 mt-1 block">5m ago</span>
+                  </div>
+                  <div className="p-3 bg-teal-50 rounded-xl border border-teal-100">
+                    <p className="text-xs font-bold text-teal-800">💬 New Message from Ramesh</p>
+                    <p className="text-xs text-slate-600 mt-1">"I have packed high-grade CPVC couplers..."</p>
+                    <span className="text-[10px] text-slate-400 mt-1 block">10m ago</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-xs font-bold text-slate-800">✅ Booking Confirmed</p>
+                    <p className="text-xs text-slate-600 mt-1">Emergency Plumbing assigned with zero markup.</p>
+                    <span className="text-[10px] text-slate-400 mt-1 block">15m ago</span>
+                  </div>
+                </div>
+                <button onClick={() => setShowNotifications(false)} className="w-full py-2.5 bg-slate-100 font-semibold text-xs rounded-xl text-slate-700 hover:bg-slate-200">Close</button>
+              </div>
+            </div>
+          )}
+
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+            
+            {/* 1. HOME SCREEN */}
+            {currentRoute === "home" && (
+              <div className="space-y-8">
+                
+                {/* Hero Card */}
+                <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                  <div className="max-w-2xl relative z-10 space-y-4">
+                    <div className="inline-flex items-center gap-2 bg-teal-500/20 text-teal-300 px-3 py-1 rounded-full text-xs font-semibold border border-teal-500/30">
+                      <span>🏛️ Certified Karnataka Cooperative</span>
+                      <span>•</span>
+                      <span>Zero Exploitation</span>
+                    </div>
+
+                    <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+                      Your Problem. Our Professionals. One Simple Platform.
+                    </h1>
+
+                    <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                      Find trusted local service professionals for household and community services in <strong className="text-white underline">{city}</strong>. Direct worker ownership means higher quality and transparent pricing.
+                    </p>
+
+                    {/* AI Problem Input Box */}
+                    <div className="bg-white rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-col sm:flex-row gap-2.5 text-slate-900">
+                      <div className="flex-1 flex items-center gap-2.5 px-3">
+                        <span className="text-xl text-blue-600">✨</span>
+                        <input 
+                          type="text" 
+                          value={aiQuery}
+                          onChange={e => setAiQuery(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && runAiDiagnosis()}
+                          placeholder="What problem are you facing? (e.g. kitchen pipe leaking, AC not cooling)" 
+                          className="w-full text-xs sm:text-sm font-medium focus:outline-none placeholder:text-slate-400"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => runAiDiagnosis()}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      >
+                        <span>Find Right Service</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+
+                    {/* Prompt suggestions */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+                      <span className="text-slate-400 font-medium">Try:</span>
+                      {["My kitchen pipe is broken and water is leaking", "My AC is not cooling", "Switch is sparking"].map(prompt => (
+                        <button 
+                          key={prompt}
+                          onClick={() => { setAiQuery(prompt); runAiDiagnosis(prompt); }}
+                          className="bg-white/10 hover:bg-white/20 text-slate-200 px-2.5 py-1 rounded-lg transition text-[11px]"
+                        >
+                          "{prompt.slice(0, 30)}..."
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cooperative Value Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  {[
+                    { label: "Worker Payout", value: "95%", desc: "Direct to service professional" },
+                    { label: "Community Rating", value: "4.9★", desc: "Based on 3,500+ verified jobs" },
+                    { label: "Avg Response", value: "18 mins", desc: "Hyperlocal neighborhood dispatch" },
+                    { label: "Verified Members", value: "240+", desc: "Aadhaar & police background checked" }
+                  ].map((s, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                      <p className="text-xs text-slate-500 font-semibold">{s.label}</p>
+                      <p className="text-xl sm:text-2xl font-extrabold text-blue-900 mt-0.5">{s.value}</p>
+                      <p className="text-[11px] text-slate-400 mt-1">{s.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Popular Services Grid */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900">Popular Services</h2>
+                      <p className="text-xs text-slate-500">Most requested home and community services in {city}</p>
+                    </div>
+                    <button onClick={() => setCurrentRoute("services")} className="text-xs font-bold text-blue-600 hover:underline">View All (17+) →</button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {CATEGORIES.slice(0, 8).map(c => (
+                      <div 
+                        key={c.id} 
+                        onClick={() => { setSelectedCategory(c); setCurrentRoute("find_pros"); }}
+                        className="bg-white hover:border-blue-500 border border-slate-200 rounded-2xl p-4 transition cursor-pointer shadow-xs hover:shadow-md group flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition">
+                              🔧
+                            </span>
+                            {c.emergency && <span className="bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded">24x7</span>}
+                          </div>
+                          <h3 className="font-bold text-sm text-slate-900">{c.name}</h3>
+                          <p className="text-xs text-slate-500 line-clamp-2 mt-1">{c.desc}</p>
+                        </div>
+                        <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100 text-xs">
+                          <span className="font-bold text-blue-700">₹{c.startingPrice} <span className="text-[10px] font-normal text-slate-400">starting</span></span>
+                          <span className="font-semibold text-amber-500">★ {c.rating}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Rated Local Professionals */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900">Nearby Recommended Professionals</h2>
+                      <p className="text-xs text-slate-500">Vetted members ready to assist in {city}</p>
+                    </div>
+                    <button onClick={() => setCurrentRoute("find_pros")} className="text-xs font-bold text-blue-600 hover:underline">Explore Map →</button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {PROFESSIONALS.filter(p => p.city === city).slice(0, 3).map(p => (
+                      <div key={p.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-lg">
+                              {p.name.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="font-bold text-sm text-slate-900">{p.name}</h4>
+                                <span className="text-blue-600 text-xs" title="Verified">✓</span>
+                              </div>
+                              <p className="text-xs text-slate-500">{p.service} • {p.exp} yrs exp</p>
+                              <p className="text-xs font-semibold text-amber-500">★ {p.rating} <span className="text-slate-400 font-normal">({p.reviews} reviews)</span></p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5 mt-3 flex-wrap">
+                            {p.skills.map(s => <span key={s} className="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md">{s}</span>)}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                          <div>
+                            <span className="text-xs text-slate-400">Starts at</span>
+                            <p className="text-sm font-extrabold text-blue-700">₹{p.price}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => { setSelectedPro(p); setCurrentRoute("pro_profile"); }}
+                              className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg"
+                            >
+                              Profile
+                            </button>
+                            <button 
+                              onClick={() => { setSelectedPro(p); setBookingService(p.service); setCurrentRoute("booking"); }}
+                              className="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs"
+                            >
+                              Book
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* 2. SERVICES MARKETPLACE */}
+            {currentRoute === "services" && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900">Services Marketplace</h1>
+                  <p className="text-xs text-slate-500">Explore all certified cooperative household and community categories</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {CATEGORIES.map(c => (
+                    <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">{c.group}</span>
+                          <span className="text-xs font-bold text-amber-500">★ {c.rating}</span>
+                        </div>
+                        <h3 className="font-bold text-base text-slate-900">{c.name}</h3>
+                        <p className="text-xs text-slate-500 mt-1">{c.desc}</p>
+                        
+                        <div className="mt-3">
+                          <p className="text-[11px] font-bold text-slate-700">Problems handled:</p>
+                          <ul className="text-xs text-slate-600 list-disc list-inside space-y-0.5 mt-1">
+                            {c.problems.slice(0, 3).map((p, idx) => <li key={idx}>{p}</li>)}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-extrabold text-blue-700 text-sm">From ₹{c.startingPrice}</span>
+                        <button 
+                          onClick={() => { setSelectedCategory(c); setCurrentRoute("find_pros"); }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs"
+                        >
+                          Find {c.name} Pros
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 3. AI ASSISTANT DIAGNOSIS */}
+            {currentRoute === "ai_assistant" && (
+              <div className="space-y-6 max-w-4xl mx-auto">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                    <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-lg">
+                      🤖
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-lg text-slate-900">Cooperative AI Diagnostic Engine</h2>
+                      <p className="text-xs text-slate-500">Natural language problem detection and immediate safety advisory</p>
+                    </div>
+                  </div>
+
+                  {/* Query Display */}
+                  <div className="p-3 bg-blue-50 text-blue-900 rounded-xl text-xs sm:text-sm font-medium">
+                    <span className="font-bold">Your Query:</span> "{aiQuery || "My kitchen pipe is broken and water is leaking"}"
+                  </div>
+
+                  {aiDiagnosis && (
+                    <div className="space-y-4">
+                      {/* Urgency & Category */}
+                      <div className="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Identified Service</span>
+                          <p className="text-base font-extrabold text-blue-800">{aiDiagnosis.category}</p>
+                        </div>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${aiDiagnosis.urgency.includes("HIGH") ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
+                          {aiDiagnosis.urgency}
+                        </span>
+                      </div>
+
+                      {/* Safety Action */}
+                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 space-y-1">
+                        <p className="text-xs font-bold uppercase tracking-wider">💡 Recommended Immediate Action:</p>
+                        <p className="text-xs sm:text-sm leading-relaxed">{aiDiagnosis.suggestedAction}</p>
+                      </div>
+
+                      {/* Follow-up question */}
+                      {aiDiagnosis.followUp && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold text-slate-700">Follow-up clarification: {aiDiagnosis.followUp}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {aiDiagnosis.options.map((opt, i) => (
+                              <button 
+                                key={i}
+                                onClick={() => setBookingProblem(`${aiQuery} (${opt})`)}
+                                className="text-xs bg-slate-100 hover:bg-teal-100 hover:text-teal-800 px-3 py-1.5 rounded-lg border border-slate-200 transition font-medium text-slate-700"
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recommended Pros */}
+                      <div className="pt-2 space-y-3">
+                        <h3 className="font-bold text-sm text-slate-900">Nearby Verified Professionals Available Now:</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {aiDiagnosis.pros.slice(0, 2).map(p => (
+                            <div key={p.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex justify-between items-center">
+                              <div>
+                                <h4 className="font-bold text-sm text-slate-900">{p.name}</h4>
+                                <p className="text-xs text-slate-500">{p.distance} km away • ★ {p.rating} ({p.jobs} jobs)</p>
+                                <p className="text-xs font-extrabold text-blue-700 mt-1">₹{p.price} starting</p>
+                              </div>
+                              <button 
+                                onClick={() => { setSelectedPro(p); setBookingService(p.service); setCurrentRoute("booking"); }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs"
+                              >
+                                Book Now
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 4. FIND PROFESSIONALS & MAP */}
+            {currentRoute === "find_pros" && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900">Find Professionals</h1>
+                    <p className="text-xs text-slate-500">Live cooperative network in {city}</p>
+                  </div>
+                </div>
+
+                {/* Simulated Radar Map */}
+                <div className="w-full h-44 bg-slate-200 rounded-3xl relative overflow-hidden border border-slate-300 flex items-center justify-center p-4">
+                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#1e40af_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                  <div className="w-24 h-24 rounded-full border-2 border-blue-500/40 animate-ping absolute"></div>
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-lg z-10">
+                    📍 You
+                  </div>
+                  {/* Pro pins */}
+                  <div className="absolute top-8 left-16 bg-teal-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">
+                    Ramesh (1.2km)
+                  </div>
+                  <div className="absolute bottom-8 right-20 bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">
+                    Rajesh (1.5km)
+                  </div>
+                  <span className="absolute bottom-2 left-3 bg-white/80 backdrop-blur-xs text-[10px] font-bold px-2 py-1 rounded-md text-slate-700">
+                    📍 Radius: {city} Service District
+                  </span>
+                </div>
+
+                {/* Pros List */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {PROFESSIONALS.filter(p => p.city === city).map(p => (
+                    <div key={p.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 text-white font-bold flex items-center justify-center text-lg">
+                            {p.name.charAt(0)}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-base text-slate-900">{p.name}</h3>
+                            <p className="text-xs text-slate-500">{p.service} • {p.exp}y exp</p>
+                            <p className="text-xs font-semibold text-amber-500">★ {p.rating} ({p.reviews} reviews)</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-3 line-clamp-2">{p.about}</p>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Starts</span>
+                          <p className="text-sm font-extrabold text-blue-700">₹{p.price}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => { setSelectedPro(p); setCurrentRoute("pro_profile"); }}
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
+                          >
+                            Profile
+                          </button>
+                          <button 
+                            onClick={() => { setSelectedPro(p); setBookingService(p.service); setCurrentRoute("booking"); }}
+                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs"
+                          >
+                            Book
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 5. PROFESSIONAL PROFILE */}
+            {currentRoute === "pro_profile" && (
+              <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+                <button onClick={() => setCurrentRoute("find_pros")} className="text-xs font-bold text-blue-600 hover:underline">← Back to Pros</button>
+                
+                <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
+                  <div className="w-16 h-16 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-2xl shadow-md">
+                    {selectedPro.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-slate-900">{selectedPro.name}</h2>
+                      <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Verified Member</span>
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium">{selectedPro.service} • {selectedPro.city}</p>
+                    <p className="text-xs font-bold text-amber-500 mt-1">★ {selectedPro.rating} ({selectedPro.reviews} community reviews)</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">About Member</h4>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{selectedPro.about}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Experience</span>
+                    <p className="text-sm font-bold text-slate-800">{selectedPro.exp} Years</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Jobs Completed</span>
+                    <p className="text-sm font-bold text-slate-800">{selectedPro.jobs}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Base Visit</span>
+                    <p className="text-sm font-extrabold text-blue-700">₹{selectedPro.price}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button 
+                    onClick={() => { setActiveChatBooking(bookings[0]); setCurrentRoute("chat"); }}
+                    className="flex-1 py-3 text-xs font-bold border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50"
+                  >
+                    💬 Direct Chat
+                  </button>
+                  <button 
+                    onClick={() => { setBookingService(selectedPro.service); setCurrentRoute("booking"); }}
+                    className="flex-1 py-3 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md"
+                  >
+                    Book Service
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 6. MULTI-STEP BOOKING FLOW */}
+            {currentRoute === "booking" && (
+              <div className="max-w-xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Book Service</h2>
+                    <p className="text-xs text-slate-500">Step {bookingStep} of 6 • Cooperative Guarantee</p>
+                  </div>
+                  <span className="text-xs font-bold text-blue-600">₹{selectedPro.price + 29 + Math.floor(selectedPro.price * 0.18) - 50} total</span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${(bookingStep / 6) * 100}%` }}></div>
+                </div>
+
+                {/* STEP 1: SERVICE */}
+                {bookingStep === 1 && (
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-sm text-slate-900">1. Confirm Service Category</h3>
+                    <div className="space-y-2">
+                      {CATEGORIES.slice(0, 4).map(c => (
+                        <div 
+                          key={c.id} 
+                          onClick={() => setBookingService(c.name)}
+                          className={`p-3 rounded-xl border cursor-pointer text-xs font-semibold flex justify-between ${bookingService === c.name ? "bg-blue-50 border-blue-600 text-blue-900" : "bg-white border-slate-200 text-slate-700"}`}
+                        >
+                          <span>{c.name}</span>
+                          <span>Starts ₹{c.startingPrice}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: PROBLEM */}
+                {bookingStep === 2 && (
+                  <div className="space-y-3">
+                    <h3 className="font-bold text-sm text-slate-900">2. Describe Problem / Parts Needed</h3>
+                    <textarea 
+                      value={bookingProblem}
+                      onChange={e => setBookingProblem(e.target.value)}
+                      placeholder="Describe the issue, leak details, or special requests..."
+                      className="w-full h-24 p-3 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    ></textarea>
+                  </div>
+                )}
+
+                {/* STEP 3: PROFESSIONAL */}
+                {bookingStep === 3 && (
+                  <div className="space-y-3">
+                    <h3 className="font-bold text-sm text-slate-900">3. Assigned Professional</h3>
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200 flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-lg">
+                        {selectedPro.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-blue-950">{selectedPro.name}</h4>
+                        <p className="text-xs text-blue-700">{selectedPro.service} • ★ {selectedPro.rating} ({selectedPro.jobs} jobs completed)</p>
+                        <p className="text-[11px] text-teal-800 font-semibold mt-0.5">✓ Cooperative Insured & Background Checked</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4: DATE & TIME */}
+                {bookingStep === 4 && (
+                  <div className="space-y-3">
+                    <h3 className="font-bold text-sm text-slate-900">4. Choose Arrival Time</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Today", "Tomorrow"].map(d => (
+                        <button key={d} onClick={() => setBookingDate(d)} className={`py-2 text-xs font-bold rounded-xl border ${bookingDate === d ? "bg-blue-600 text-white border-blue-600" : "bg-slate-50 border-slate-200 text-slate-700"}`}>
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="space-y-2 pt-2">
+                      {["Immediate (Emergency within 30 mins)", "Morning (9:00 AM - 12:00 PM)", "Evening (5:00 PM - 8:00 PM)"].map(t => (
+                        <div key={t} onClick={() => setBookingTime(t)} className={`p-3 rounded-xl border text-xs font-semibold cursor-pointer ${bookingTime === t ? "bg-teal-50 border-teal-600 text-teal-900" : "bg-white border-slate-200 text-slate-700"}`}>
+                          {t}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 5: ADDRESS */}
+                {bookingStep === 5 && (
+                  <div className="space-y-3">
+                    <h3 className="font-bold text-sm text-slate-900">5. Service Address in {city}</h3>
+                    <input 
+                      type="text"
+                      value={bookingAddress}
+                      onChange={e => setBookingAddress(e.target.value)}
+                      placeholder="Flat/House No, Street, Landmark"
+                      className="w-full p-3 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                    />
+                  </div>
+                )}
+
+                {/* STEP 6: REVIEW */}
+                {bookingStep === 6 && (
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-sm text-slate-900">6. Review & Confirm Booking</h3>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                      <div className="flex justify-between"><span className="text-slate-500">Service:</span><span className="font-bold">{selectedPro.service}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Professional:</span><span className="font-bold">{selectedPro.name}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Slot:</span><span className="font-bold">{bookingDate} • {bookingTime}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Address:</span><span className="font-bold">{bookingAddress}</span></div>
+                      <hr className="border-slate-200 my-2" />
+                      <div className="flex justify-between"><span className="text-slate-500">Base Visit Fee:</span><span>₹{selectedPro.price}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Co-op Platform Fee:</span><span>₹29</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">GST (18%):</span><span>₹{Math.floor(selectedPro.price * 0.18)}</span></div>
+                      <div className="flex justify-between text-teal-700 font-bold"><span>Co-op Discount:</span><span>-₹50</span></div>
+                      <div className="flex justify-between font-extrabold text-sm text-slate-900 pt-2 border-t border-slate-200">
+                        <span>Total Payable:</span><span className="text-blue-700">₹{selectedPro.price + 29 + Math.floor(selectedPro.price * 0.18) - 50}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Nav buttons */}
+                <div className="flex justify-between pt-2">
+                  {bookingStep > 1 ? (
+                    <button onClick={() => setBookingStep(s => s - 1)} className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Back</button>
+                  ) : <div></div>}
+                  
+                  {bookingStep < 6 ? (
+                    <button onClick={() => setBookingStep(s => s + 1)} className="px-6 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs">Continue →</button>
+                  ) : (
+                    <button onClick={confirmBooking} className="px-6 py-2.5 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-xl shadow-md">Confirm Booking</button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 7. REAL-TIME CHAT WITH PRO (FEATURE HIGHLIGHT) */}
+            {currentRoute === "chat" && (
+              <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden flex flex-col h-[580px]">
+                {/* Chat Top bar */}
+                <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setCurrentRoute("my_bookings")} className="text-slate-400 hover:text-white mr-1">←</button>
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm">
+                        {activeChatBooking.proName.charAt(0)}
+                      </div>
+                      <span className="w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900 absolute bottom-0 right-0"></span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-bold text-sm">{activeChatBooking.proName}</h3>
+                        <span className="text-xs text-blue-400">✓</span>
+                      </div>
+                      <p className="text-[11px] text-slate-300">
+                        {isTyping ? <span className="text-teal-400 font-semibold animate-pulse">typing...</span> : `${activeChatBooking.service} • Booking #${activeChatBooking.id}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => { setTrackingBooking(activeChatBooking); setCurrentRoute("track_service"); }}
+                    className="bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 text-xs font-bold px-3 py-1.5 rounded-xl border border-teal-500/30 transition"
+                  >
+                    🛵 Track Live
+                  </button>
+                </div>
+
+                {/* Message list */}
+                <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50">
+                  <div className="text-center my-2">
+                    <span className="bg-slate-200 text-slate-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                      🔒 Masked & Insured Cooperative Chat
+                    </span>
+                  </div>
+
+                  {messages.map(m => (
+                    <div key={m.id} className={`flex flex-col ${m.sender === "customer" ? "items-end" : "items-start"}`}>
+                      <div className={`max-w-[78%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-2xs ${
+                        m.sender === "customer" 
+                          ? "bg-blue-600 text-white rounded-br-none" 
+                          : "bg-white text-slate-800 border border-slate-200 rounded-bl-none"
+                      }`}>
+                        {m.text}
+                        <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${m.sender === "customer" ? "text-blue-200" : "text-slate-400"}`}>
+                          <span>{m.time}</span>
+                          {m.sender === "customer" && (
+                            <span className={m.status === "read" ? "text-cyan-300 font-bold" : "text-white/60"}>
+                              {m.status === "read" ? "✓✓" : m.status === "delivered" ? "✓✓" : "✓"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {isTyping && (
+                    <div className="flex items-center gap-2 text-slate-400 text-xs bg-white px-3 py-2 rounded-2xl w-fit border border-slate-200 shadow-2xs">
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100"></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200"></span>
+                      <span className="text-[11px] text-slate-500 font-medium ml-1">{activeChatBooking.proName} is typing</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Reply Chips */}
+                <div className="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto scrollbar-none">
+                  {["Are you on your way?", "I'm at the gate waiting", "Please bring replacement parts", "Flat 302, 3rd floor"].map((chip, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => sendChatMessage(chip)}
+                      className="whitespace-nowrap bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 text-[11px] font-medium px-2.5 py-1 rounded-full border border-slate-200 transition"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input form */}
+                <div className="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+                  <button 
+                    onClick={() => sendChatMessage("📷 [Photo Shared: Leaking pipe closeup]")}
+                    className="p-2 text-slate-400 hover:text-slate-700 text-lg"
+                    title="Share Photo"
+                  >
+                    📷
+                  </button>
+                  <input 
+                    type="text" 
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+                    placeholder="Type message to professional..." 
+                    className="flex-1 bg-slate-100 text-xs sm:text-sm font-medium px-3.5 py-2.5 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <button 
+                    onClick={() => sendChatMessage()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-full transition shadow-xs"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 8. TRACK SERVICE PAGE */}
+            {currentRoute === "track_service" && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Live Service Tracking</h2>
+                      <p className="text-xs text-slate-500">Booking #{trackingBooking.id} • {trackingBooking.service}</p>
+                    </div>
+                    <button 
+                      onClick={advanceTracking}
+                      className="bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-xl transition border border-amber-300"
+                    >
+                      ⚡ Advance Status (Demo)
+                    </button>
+                  </div>
+
+                  {/* Route Map Simulation */}
+                  <div className="h-44 bg-slate-100 rounded-2xl border border-slate-200 relative overflow-hidden flex items-center justify-between p-6">
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#1e40af_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                    <div className="relative z-10 text-center">
+                      <div className="w-12 h-12 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-lg mx-auto shadow-md">
+                        🛵
+                      </div>
+                      <p className="text-xs font-bold text-slate-900 mt-1">{trackingBooking.proName}</p>
+                      <p className="text-[10px] text-blue-600 font-semibold">{trackingBooking.dist} km away</p>
+                    </div>
+
+                    <div className="flex-1 px-4 relative z-10">
+                      <div className="h-1 bg-blue-200 w-full rounded-full relative">
+                        <div className="h-1 bg-blue-600 rounded-full" style={{ width: trackingBooking.status === 'Arrived' ? '100%' : '60%' }}></div>
+                      </div>
+                      <p className="text-center text-[10px] font-bold text-slate-500 mt-2">
+                        {trackingBooking.eta > 0 ? `ETA: ~${trackingBooking.eta} mins` : "Arrived at location"}
+                      </p>
+                    </div>
+
+                    <div className="relative z-10 text-center">
+                      <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-lg mx-auto shadow-md">
+                        🏠
+                      </div>
+                      <p className="text-xs font-bold text-slate-900 mt-1">Your House</p>
+                      <p className="text-[10px] text-slate-400">Flat 302</p>
+                    </div>
+                  </div>
+
+                  {/* Timeline Checklist */}
+                  <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Trip Progression</h3>
+                    {[
+                      { s: "Requested", l: "Booking Confirmed by Cooperative Pool" },
+                      { s: "Accepted", l: "Professional Accepted & Tools Packed" },
+                      { s: "On the Way", l: "Professional En Route on Two-Wheeler" },
+                      { s: "Arrived", l: "Arrived at Gate (OTP: 4821)" },
+                      { s: "Service Started", l: "Repair Work in Progress" },
+                      { s: "Completed", l: "Service Completed & Receipt Ready" }
+                    ].map((step, idx) => {
+                      const all = ["Requested", "Accepted", "On the Way", "Arrived", "Service Started", "Completed"];
+                      const isDone = all.indexOf(step.s) <= all.indexOf(trackingBooking.status);
+                      return (
+                        <div key={idx} className="flex items-center gap-3">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${isDone ? "bg-green-600 text-white" : "bg-slate-200 text-slate-400"}`}>
+                            {isDone ? "✓" : idx + 1}
+                          </span>
+                          <span className={`text-xs font-medium ${isDone ? "text-slate-900 font-semibold" : "text-slate-400"}`}>{step.l}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => { setActiveChatBooking(trackingBooking); setCurrentRoute("chat"); }}
+                      className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
+                    >
+                      <span>💬 Direct Chat with Pro</span>
+                    </button>
+                    <a 
+                      href={`tel:+919845021345`}
+                      className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 flex items-center justify-center"
+                    >
+                      📞 Call Masked
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 9. MY BOOKINGS */}
+            {currentRoute === "my_bookings" && (
+              <div className="space-y-6 max-w-3xl mx-auto">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900">My Bookings</h1>
+                  <p className="text-xs text-slate-500">Track and manage your cooperative gig requests</p>
+                </div>
+
+                <div className="space-y-3">
+                  {bookings.map(b => (
+                    <div key={b.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-blue-900">#{b.id}</span>
+                          <span className="bg-teal-50 text-teal-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{b.status}</span>
+                        </div>
+                        <h3 className="font-bold text-base text-slate-900 mt-1">{b.service}</h3>
+                        <p className="text-xs text-slate-500">Pro: <strong>{b.proName}</strong> • {b.date} ({b.time})</p>
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-1">{b.problem}</p>
+                      </div>
+
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 border-t sm:border-0 pt-3 sm:pt-0 border-slate-100">
+                        <span className="text-sm font-extrabold text-blue-700">₹{b.amount}</span>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => { setActiveChatBooking(b); setCurrentRoute("chat"); }}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg"
+                          >
+                            Chat
+                          </button>
+                          <button 
+                            onClick={() => { setTrackingBooking(b); setCurrentRoute("track_service"); }}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs"
+                          >
+                            Track
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 10. PRO DASHBOARD MODE */}
+            {role === "PRO" && (
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900">Worker Partner Portal: Ramesh Kumar</h2>
+                      <p className="text-xs text-slate-500">Karnataka Cooperative Member ID: KRN-8821</p>
+                    </div>
+                    <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full">● Online & Available</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Today's Payout</span>
+                      <p className="text-xl font-extrabold text-green-700">₹1,850</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Co-op Dividend</span>
+                      <p className="text-xl font-extrabold text-teal-700">₹4,200</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Customer Rating</span>
+                      <p className="text-xl font-extrabold text-amber-500">★ 4.9</p>
+                    </div>
+                  </div>
+
+                  <h3 className="font-bold text-sm text-slate-900 pt-2">Active Assigned Request:</h3>
+                  <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200 space-y-2 text-xs">
+                    <div className="flex justify-between font-bold text-blue-900">
+                      <span>Booking #BK-8421 (Aditi Sharma)</span>
+                      <span>₹354 Payout</span>
+                    </div>
+                    <p className="text-slate-700">Problem: Kitchen sink drain pipe burst</p>
+                    <p className="text-slate-500">Address: #42, 3rd Cross, Koramangala 4th Block</p>
+                    <div className="flex gap-2 pt-2">
+                      <button onClick={() => { setActiveChatBooking(bookings[0]); setCurrentRoute("chat"); }} className="flex-1 py-2 bg-blue-600 text-white font-bold rounded-lg text-xs">
+                        Open Customer Chat
+                      </button>
+                      <button onClick={advanceTracking} className="flex-1 py-2 bg-teal-600 text-white font-bold rounded-lg text-xs">
+                        Update Status (Next Step)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 11. ADMIN DASHBOARD MODE */}
+            {role === "ADMIN" && (
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                  <h2 className="text-lg font-bold text-slate-900 pb-2 border-b border-slate-100">Platform Governance Overview</h2>
+                  <div className="grid grid-cols-4 gap-3 text-center">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100"><p className="text-xs text-slate-400">Total Users</p><p className="text-lg font-bold">1,420</p></div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100"><p className="text-xs text-slate-400">Verified Pros</p><p className="text-lg font-bold text-blue-600">{PROFESSIONALS.length}</p></div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100"><p className="text-xs text-slate-400">Active Gigs</p><p className="text-lg font-bold text-teal-600">{bookings.length}</p></div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100"><p className="text-xs text-slate-400">Disputes</p><p className="text-lg font-bold text-green-600">0</p></div>
+                  </div>
+
+                  <h3 className="font-bold text-sm text-slate-900 pt-2">Cooperative Member Verification:</h3>
+                  <div className="space-y-2">
+                    {PROFESSIONALS.map(p => (
+                      <div key={p.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                        <div>
+                          <p className="font-bold text-slate-900">{p.name} ({p.service})</p>
+                          <p className="text-[11px] text-slate-500">{p.city} • Police & Skill Verified</p>
+                        </div>
+                        <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold">Approved</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 12. PROFILE EDITOR (CUSTOMER & PRO) */}
+            {currentRoute === "profile_editor" && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Profile & Settings Editor</h2>
+                      <p className="text-xs text-slate-500">
+                        {role === "PRO" 
+                          ? "Manage your working hours, coverage area, and service availability" 
+                          : "Manage your personal details, phone number, and service address"}
+                      </p>
+                    </div>
+                    <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+                      {role === "PRO" ? "👷 Pro Workspace" : "👤 Consumer Member"}
+                    </span>
+                  </div>
+
+                  {/* Mode switcher tabs */}
+                  <div className="flex bg-slate-100 p-1 rounded-2xl">
+                    <button 
+                      onClick={() => setRole("CUSTOMER")}
+                      className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${role === "CUSTOMER" ? "bg-white text-blue-700 shadow-xs" : "text-slate-500 hover:text-slate-800"}`}
+                    >
+                      Customer Profile
+                    </button>
+                    <button 
+                      onClick={() => setRole("PRO")}
+                      className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${role === "PRO" ? "bg-white text-amber-800 shadow-xs" : "text-slate-500 hover:text-slate-800"}`}
+                    >
+                      Service Professional Profile
+                    </button>
+                  </div>
+
+                  {/* CUSTOMER FORM */}
+                  {role === "CUSTOMER" ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                        <input 
+                          type="text" 
+                          value={userName} 
+                          onChange={e => setUserName(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number (Cooperative Masked for Security)</label>
+                        <input 
+                          type="text" 
+                          value={userPhone} 
+                          onChange={e => setUserPhone(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Primary Service Address</label>
+                        <textarea 
+                          value={userAddress} 
+                          onChange={e => setUserAddress(e.target.value)}
+                          className="w-full h-20 p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                          placeholder="Flat/House No, Building, Area, District"
+                        ></textarea>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Family Emergency Contact</label>
+                        <input 
+                          type="text" 
+                          value={userEmergencyContact} 
+                          onChange={e => setUserEmergencyContact(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* SERVICE PROFESSIONAL FORM */
+                    <div className="space-y-4">
+                      <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs">
+                        <strong>Logged in as:</strong> Ramesh Kumar (Member ID: KRN-8821 • Certified Plumber)
+                      </div>
+
+                      {/* Availability switch */}
+                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                          <p className="font-bold text-xs text-slate-900">Instant Availability Status</p>
+                          <p className="text-[11px] text-slate-500">Appear in emergency dispatch and live searches</p>
+                        </div>
+                        <button 
+                          onClick={() => setProOnline(!proOnline)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${proOnline ? "bg-green-100 text-green-800 border border-green-300" : "bg-slate-200 text-slate-600"}`}
+                        >
+                          {proOnline ? "● Available Now" : "○ Busy"}
+                        </button>
+                      </div>
+
+                      {/* Working Hours */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Working Hours</label>
+                        <input 
+                          type="text" 
+                          value={proHours} 
+                          onChange={e => setProHours(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
+                        />
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {["24x7 Emergency Service", "7:00 AM - 9:00 PM (All Days)", "8:00 AM - 7:00 PM (Mon-Sat)"].map((hrs, idx) => (
+                            <button 
+                              key={idx}
+                              onClick={() => setProHours(hrs)}
+                              className="text-[11px] bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200 transition font-medium"
+                            >
+                              {hrs}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Service Area */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Service Coverage Area ({city})</label>
+                        <input 
+                          type="text" 
+                          value={proAreas} 
+                          onChange={e => setProAreas(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
+                        />
+                        <p className="text-[11px] text-slate-400 mt-1">Add quick localities:</p>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {["Koramangala", "HSR Layout", "Indiranagar", "BTM Layout", "Jayanagar", "Whitefield"].map((area, idx) => (
+                            <button 
+                              key={idx}
+                              onClick={() => {
+                                if (!proAreas.includes(area)) {
+                                  setProAreas(prev => prev ? `${prev}, ${area}` : area);
+                                }
+                              }}
+                              className="text-[11px] bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 px-2.5 py-0.5 rounded-md border border-slate-200 transition font-medium"
+                            >
+                              + {area}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Base Fee */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Base Inspection & Visit Fee (₹)</label>
+                        <input 
+                          type="number" 
+                          value={proRate} 
+                          onChange={e => setProRate(Number(e.target.value))}
+                          className="w-full p-3 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-bold text-blue-700"
+                        />
+                        <p className="text-[10px] text-slate-400 mt-1">Standard cooperative minimum rate: ₹199</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save Button */}
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => {
+                        setBookingAddress(userAddress);
+                        setProfileToast(true);
+                        setTimeout(() => setProfileToast(false), 3000);
+                      }}
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                    >
+                      <span>💾 Save Profile Changes</span>
+                    </button>
+                  </div>
+
+                  {profileToast && (
+                    <div className="p-3 bg-green-50 border border-green-200 text-green-800 text-xs font-bold rounded-xl text-center">
+                      ✓ Profile details and preferences updated successfully!
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* REVIEW MODAL */}
+          {reviewModal && (
+            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+                <h3 className="text-base font-bold text-slate-900">How was your service with Ramesh?</h3>
+                <p className="text-xs text-slate-500">Your feedback helps improve our worker cooperative quality.</p>
+                
+                <div className="flex justify-center gap-2 text-2xl py-2">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button key={star} onClick={() => setReviewScore(star)} className={star <= reviewScore ? "text-amber-400" : "text-slate-200"}>
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                <textarea 
+                  value={reviewText}
+                  onChange={e => setReviewText(e.target.value)}
+                  placeholder="Share a short review about punctuality and workmanship..." 
+                  className="w-full h-20 p-3 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-none"
+                ></textarea>
+
+                <div className="flex gap-2">
+                  <button onClick={() => setReviewModal(false)} className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Skip</button>
+                  <button onClick={() => setReviewModal(false)} className="flex-1 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl shadow-xs">Submit</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* BOTTOM NAVIGATION (MOBILE) */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex justify-around items-center py-2 px-3 shadow-lg md:hidden">
+            {[
+              { id: "home", label: "Home", icon: "🏠" },
+              { id: "services", label: "Services", icon: "🔧" },
+              { id: "ai_assistant", label: "AI Assist", icon: "✨" },
+              { id: "chat", label: "Chat", icon: "💬" },
+              { id: "my_bookings", label: "Bookings", icon: "📋" },
+              { id: "profile_editor", label: "Profile", icon: "👤" }
+            ].map(tab => (
+              <button 
+                key={tab.id}
+                onClick={() => setCurrentRoute(tab.id)}
+                className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold transition ${
+                  currentRoute === tab.id ? "text-blue-600 font-bold" : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                <span className="text-base">{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

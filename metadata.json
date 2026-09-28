@@ -1,0 +1,6 @@
+{
+  "name": "Cooperative Gig Services Platform",
+  "description": "Connects customers with nearby verified service professionals with AI diagnosis, booking, and real-time chat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
