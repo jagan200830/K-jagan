@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jagan1 - Cooperative Gig Services Platform</title>
-  <meta name="description" content="Jagan1 (jagan1.com) - Worker-owned cooperative platform connecting local households with verified service professionals.">
+  <title>Cooperative Gig Services Platform</title>
+  <meta name="description" content="Connects customers with nearby verified service professionals with AI diagnosis, booking, and real-time chat.">
+  <meta property="og:title" content="Cooperative Gig Services Platform">
+  <meta property="og:description" content="Connects customers with nearby verified service professionals with AI diagnosis, booking, and real-time chat.">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +15,64 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #070d1e;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
     .scrollbar-none::-webkit-scrollbar { display: none; }
     .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Premium Glassmorphism tokens */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    }
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      background: rgba(24, 38, 68, 0.85);
+      border-color: rgba(56, 189, 248, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px 0 rgba(14, 165, 233, 0.12);
+    }
+    .glass-header {
+      background: rgba(7, 13, 30, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f8fafc;
+    }
+    .glass-input:focus {
+      background: rgba(15, 23, 42, 0.85);
+      border-color: #38bdf8;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+    }
+    #three-bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .app-content {
+      position: relative;
+      z-index: 10;
+    }
   </style>
   <script>
     tailwind.config = {
@@ -41,6 +97,319 @@
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+
+    // --- 3D CORPORATE TECHNOLOGY BACKGROUND COMPONENT ---
+    function Corporate3DBackground() {
+      const mountRef = useRef(null);
+
+      useEffect(() => {
+        const container = mountRef.current;
+        if (!container || typeof THREE === "undefined") return;
+
+        // Check prefers-reduced-motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x070e20, 0.022);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 36);
+
+        let renderer;
+        try {
+          renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
+          });
+        } catch (e) {
+          console.warn("WebGL initialization failed, falling back to CSS background", e);
+          return;
+        }
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.setClearColor(0x070d1e, 1);
+        container.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x0f274a, 1.4);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0x38bdf8, 2.2);
+        keyLight.position.set(15, 25, 20);
+        scene.add(keyLight);
+
+        const rimLight = new THREE.PointLight(0x06b6d4, 2.8, 80);
+        rimLight.position.set(-18, -12, 10);
+        scene.add(rimLight);
+
+        const fillLight = new THREE.DirectionalLight(0x1e3a8a, 1.2);
+        fillLight.position.set(-15, -20, -10);
+        scene.add(fillLight);
+
+        // Group for all floating 3D service elements
+        const worldGroup = new THREE.Group();
+        scene.add(worldGroup);
+
+        // 1. NETWORK NODES & SMART DISPATCH MESH
+        const nodeCount = 45;
+        const nodeGeometry = new THREE.SphereGeometry(0.24, 16, 16);
+        const nodeMaterial = new THREE.MeshStandardMaterial({
+          color: 0x38bdf8,
+          emissive: 0x0284c7,
+          emissiveIntensity: 0.6,
+          metalness: 0.8,
+          roughness: 0.2
+        });
+
+        const nodePositions = [];
+        const nodes = [];
+        for (let i = 0; i < nodeCount; i++) {
+          const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+          const x = (Math.random() - 0.5) * 60;
+          const y = (Math.random() - 0.5) * 36;
+          const z = (Math.random() - 0.5) * 24 - 4;
+          node.position.set(x, y, z);
+          node.userData = {
+            baseX: x, baseY: y, baseZ: z,
+            speed: 0.0006 + Math.random() * 0.001,
+            phase: Math.random() * Math.PI * 2
+          };
+          worldGroup.add(node);
+          nodes.push(node);
+          nodePositions.push(node.position);
+        }
+
+        // Interconnecting lines for nearby nodes
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: 0x0ea5e9,
+          transparent: true,
+          opacity: 0.18
+        });
+
+        const lineGeo = new THREE.BufferGeometry();
+        const linePoints = [];
+        for (let i = 0; i < nodeCount; i++) {
+          for (let j = i + 1; j < nodeCount; j++) {
+            const dist = nodePositions[i].distanceTo(nodePositions[j]);
+            if (dist < 12) {
+              linePoints.push(nodePositions[i].x, nodePositions[i].y, nodePositions[i].z);
+              linePoints.push(nodePositions[j].x, nodePositions[j].y, nodePositions[j].z);
+            }
+          }
+        }
+        lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePoints, 3));
+        const lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
+        worldGroup.add(lineSegments);
+
+        // 2. 3D PLUMBING PIPES & VALVES (Subtle, sleek corporate cylinders and torus elbows)
+        const pipeMaterial = new THREE.MeshStandardMaterial({
+          color: 0x1e3a8a,
+          emissive: 0x075985,
+          emissiveIntensity: 0.25,
+          metalness: 0.9,
+          roughness: 0.2,
+          transparent: true,
+          opacity: 0.75
+        });
+
+        const pipeGroup = new THREE.Group();
+        // Pipe 1 (Horizontal with elbow)
+        const pipeGeo1 = new THREE.CylinderGeometry(0.35, 0.35, 14, 24);
+        const p1 = new THREE.Mesh(pipeGeo1, pipeMaterial);
+        p1.rotation.z = Math.PI / 2.8;
+        p1.position.set(-18, 9, -6);
+        pipeGroup.add(p1);
+
+        // Valve torus
+        const torusGeo = new THREE.TorusGeometry(1.2, 0.28, 16, 32);
+        const valve = new THREE.Mesh(torusGeo, new THREE.MeshStandardMaterial({
+          color: 0x38bdf8,
+          metalness: 0.95,
+          roughness: 0.15,
+          emissive: 0x0369a1,
+          emissiveIntensity: 0.4
+        }));
+        valve.position.set(-14, 12, -4);
+        pipeGroup.add(valve);
+
+        // Pipe 2 (Vertical flow)
+        const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 10, 24), pipeMaterial);
+        p2.position.set(20, -7, -8);
+        p2.rotation.z = -Math.PI / 4;
+        pipeGroup.add(p2);
+
+        worldGroup.add(pipeGroup);
+
+        // 3. 3D ELECTRICAL CIRCUITS & REPAIR EQUIPMENT (Hex nuts, geometric tool forms, circuit paths)
+        const toolMaterial = new THREE.MeshStandardMaterial({
+          color: 0x0f172a,
+          emissive: 0x1e293b,
+          metalness: 0.9,
+          roughness: 0.25,
+          wireframe: false
+        });
+        const cyanEdgeMaterial = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.4 });
+
+        const serviceObjects = [];
+        // Hexagonal repair prisms (Tools & hardware)
+        for (let i = 0; i < 6; i++) {
+          const hexGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.6, 6);
+          const hexMesh = new THREE.Mesh(hexGeo, toolMaterial);
+          const edges = new THREE.LineSegments(new THREE.EdgesGeometry(hexGeo), cyanEdgeMaterial);
+          hexMesh.add(edges);
+
+          const hx = (i % 2 === 0 ? -1 : 1) * (14 + Math.random() * 12);
+          const hy = (Math.random() - 0.5) * 26;
+          const hz = (Math.random() - 0.5) * 12 - 2;
+          hexMesh.position.set(hx, hy, hz);
+          hexMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+          hexMesh.userData = {
+            rotSpeedX: 0.002 * (Math.random() > 0.5 ? 1 : -1),
+            rotSpeedY: 0.003 * (Math.random() > 0.5 ? 1 : -1)
+          };
+          worldGroup.add(hexMesh);
+          serviceObjects.push(hexMesh);
+        }
+
+        // 4. 3D ISOMETRIC CORPORATE BUILDINGS & RESIDENCES (Clean corporate architectural geometry)
+        const buildingMat = new THREE.MeshStandardMaterial({
+          color: 0x0b1329,
+          roughness: 0.4,
+          metalness: 0.8,
+          transparent: true,
+          opacity: 0.65
+        });
+        const buildingEdgeMat = new THREE.LineBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.35 });
+
+        const buildingCluster = new THREE.Group();
+        const bHeights = [7, 10, 6, 12, 8];
+        bHeights.forEach((h, idx) => {
+          const bGeo = new THREE.BoxGeometry(2.2, h, 2.2);
+          const bMesh = new THREE.Mesh(bGeo, buildingMat);
+          const bEdges = new THREE.LineSegments(new THREE.EdgesGeometry(bGeo), buildingEdgeMat);
+          bMesh.add(bEdges);
+          bMesh.position.set(-24 + idx * 3.2, -14 + h / 2, -12);
+          buildingCluster.add(bMesh);
+        });
+        worldGroup.add(buildingCluster);
+
+        // 5. 3D FLOATING LOGISTICS CUBES & SMART ROUTING NODES
+        for (let i = 0; i < 5; i++) {
+          const cubeGeo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+          const cubeMat = new THREE.MeshStandardMaterial({
+            color: 0x0c2340,
+            emissive: 0x0284c7,
+            emissiveIntensity: 0.3,
+            metalness: 0.85,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.8
+          });
+          const cube = new THREE.Mesh(cubeGeo, cubeMat);
+          const cEdges = new THREE.LineSegments(new THREE.EdgesGeometry(cubeGeo), cyanEdgeMaterial);
+          cube.add(cEdges);
+          cube.position.set(16 + (i * 2), 6 + (i * 2.5) - 4, -4 + (i * 2));
+          cube.userData = {
+            rotSpeedX: 0.004,
+            rotSpeedY: 0.005,
+            floatY: cube.position.y
+          };
+          worldGroup.add(cube);
+          serviceObjects.push(cube);
+        }
+
+        // Mouse Parallax
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const onMouseMove = (event) => {
+          mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+          mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+          targetX = mouseX * 2.5;
+          targetY = mouseY * 1.8;
+        };
+
+        window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+        // Responsive resize
+        const onResize = () => {
+          if (!renderer || !camera) return;
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+        window.addEventListener('resize', onResize);
+
+        // Animation Loop
+        let animationFrameId;
+        let clock = new THREE.Clock();
+
+        const animate = () => {
+          animationFrameId = requestAnimationFrame(animate);
+
+          const delta = clock.getDelta();
+          const elapsed = clock.getElapsedTime();
+
+          if (!prefersReducedMotion) {
+            // Smooth camera lerp for gentle parallax
+            camera.position.x += (targetX - camera.position.x) * 0.04;
+            camera.position.y += (targetY - camera.position.y) * 0.04;
+            camera.lookAt(0, 0, 0);
+
+            // Subtle rotation of the 3D world
+            worldGroup.rotation.y = Math.sin(elapsed * 0.08) * 0.05;
+            worldGroup.rotation.x = Math.cos(elapsed * 0.06) * 0.03;
+
+            // Oscillate network nodes
+            nodes.forEach(node => {
+              const { baseX, baseY, baseZ, speed, phase } = node.userData;
+              node.position.y = baseY + Math.sin(elapsed * 1.5 + phase) * 0.5;
+              node.position.x = baseX + Math.cos(elapsed * 1.2 + phase) * 0.3;
+            });
+
+            // Rotate service objects (hardware tools, logistics cubes)
+            serviceObjects.forEach(obj => {
+              obj.rotation.x += obj.userData.rotSpeedX || 0.002;
+              obj.rotation.y += obj.userData.rotSpeedY || 0.003;
+              if (obj.userData.floatY !== undefined) {
+                obj.position.y = obj.userData.floatY + Math.sin(elapsed * 1.4) * 0.6;
+              }
+            });
+
+            // Gentle valve pulsation
+            valve.rotation.z += 0.004;
+            pipeGroup.rotation.z = Math.sin(elapsed * 0.15) * 0.03;
+          }
+
+          renderer.render(scene, camera);
+        };
+
+        if (prefersReducedMotion) {
+          renderer.render(scene, camera);
+        } else {
+          animate();
+        }
+
+        // Cleanup
+        return () => {
+          if (animationFrameId) cancelAnimationFrame(animationFrameId);
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('resize', onResize);
+          if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+            renderer.dispose();
+          }
+        };
+      }, []);
+
+      return <div id="three-bg-canvas" ref={mountRef} aria-hidden="true" />;
+    }
+
 
     // --- SAMPLE DATA ---
     const CITIES = ["Bengaluru", "Ballari", "Mysuru", "Tumakuru"];
@@ -113,6 +482,114 @@
       { id: 5, sender: "customer", text: "Thank you! Flat 302, 3rd floor. Security has been informed.", time: "10:24 AM", status: "delivered" }
     ];
 
+    const PORTFOLIO_GALLERY = {
+      "Plumbing": [
+        {
+          id: "plumb_1",
+          title: "Dual-Line Copper & CPVC Manifold Assembly",
+          category: "Plumbing Installation",
+          image: "/portfolio/plumbing_installation_portfolio_1790690637076.jpg",
+          desc: "Architectural grade manifold with dual quarter-turn shutoffs, brass pressure gauge integration, and vibration dampeners for a 4-bedroom villa.",
+          completedAt: "September 2026",
+          location: "Koramangala 4th Block",
+          metrics: "6.5 Bar Pressure Tested · Zero Leaks",
+          tags: ["CPVC Manifold", "Pressure Relief", "Brass Valves"]
+        },
+        {
+          id: "plumb_2",
+          title: "Booster Pump Automation & Sensor Wiring",
+          category: "Electrical & Pumps",
+          image: "/portfolio/electrical_wiring_portfolio_1790690619985.jpg",
+          desc: "Dry-run protection relay panel and magnetic starter wiring for multi-story overhead water tank pump.",
+          completedAt: "August 2026",
+          location: "HSR Layout Sector 2",
+          metrics: "IP65 Weatherproof · Auto Cutoff",
+          tags: ["Pump Control", "Dry-Run Relay", "Safety Ground"]
+        },
+        {
+          id: "plumb_3",
+          title: "Luxury Kitchen Under-Sink Sanitization & Seal",
+          category: "Finishing & Cleaning",
+          image: "/portfolio/deep_cleaning_portfolio_1790690651395.jpg",
+          desc: "Complete degreasing, silicone sanitary joint sealing, and anti-fungal barrier application following main pipe replacement.",
+          completedAt: "September 2026",
+          location: "Indiranagar 100ft Road",
+          metrics: "100% Odor Sealed · Food Safe",
+          tags: ["Sanitary Seal", "Deep Degreasing", "Silicone Grout"]
+        }
+      ],
+      "Electrical": [
+        {
+          id: "elec_1",
+          title: "3-Phase Distribution Board & Circuit Protection",
+          category: "Electrical Engineering",
+          image: "/portfolio/electrical_wiring_portfolio_1790690619985.jpg",
+          desc: "Industrial-grade distribution box rewiring with individual RCBO breakers per zone, color-coded phase balancing, and clean cable bundling.",
+          completedAt: "September 2026",
+          location: "Jayanagar 4th T Block",
+          metrics: "Zero Neutral Leakage · Thermal Scanned",
+          tags: ["3-Phase DB", "RCBO Safety", "Cable Looming"]
+        },
+        {
+          id: "elec_2",
+          title: "Solar Water Heater Sensor & Hybrid Line",
+          category: "Plumbing & Solar",
+          image: "/portfolio/plumbing_installation_portfolio_1790690637076.jpg",
+          desc: "Temperature probe immersion well and copper piping integration with digital timer switchboard.",
+          completedAt: "August 2026",
+          location: "JP Nagar Phase 3",
+          metrics: "3.2kW Hybrid Backup · Surge Isolated",
+          tags: ["Solar Wiring", "Thermostat", "Copper Earth"]
+        },
+        {
+          id: "elec_3",
+          title: "Server Room Anti-Static Surface Decontamination",
+          category: "Cleanroom Care",
+          image: "/portfolio/deep_cleaning_portfolio_1790690651395.jpg",
+          desc: "Precision HEPA dust extraction and anti-static surface treatment across UPS consoles and electrical racks.",
+          completedAt: "July 2026",
+          location: "Electronic City Phase 1",
+          metrics: "Class 10,000 Certified · Static Safe",
+          tags: ["Anti-Static", "Rack Cleanup", "HEPA Vacuum"]
+        }
+      ],
+      "Deep Home Cleaning": [
+        {
+          id: "clean_1",
+          title: "Luxury Kitchen Quartz Polish & Degreasing",
+          category: "Deep Cleaning",
+          image: "/portfolio/deep_cleaning_portfolio_1790690651395.jpg",
+          desc: "High-pressure thermal steam extraction of heavy chimney grease, grout line rejuvenation, and food-grade mineral sealing.",
+          completedAt: "September 2026",
+          location: "Sarjapur Road Green Glen",
+          metrics: "99.9% Bacteria Elimination · Eco Certified",
+          tags: ["Steam Extraction", "Quartz Seal", "Degreased"]
+        },
+        {
+          id: "clean_2",
+          title: "Hard Water Mineral Descaling on Sanitary Fixtures",
+          category: "Fixture Restoration",
+          image: "/portfolio/plumbing_installation_portfolio_1790690637076.jpg",
+          desc: "Acid-free herbal descaling eliminating years of hard calcium buildup on chrome mixer taps and shower manifolds.",
+          completedAt: "August 2026",
+          location: "Whitefield Hope Farm",
+          metrics: "Zero Enamel Corrosion · Mirror Finish",
+          tags: ["Herbal Descale", "Chrome Polish", "Zero Scratches"]
+        },
+        {
+          id: "clean_3",
+          title: "Appliance & Electrical Switchboard Detailing",
+          category: "Appliance Hygiene",
+          image: "/portfolio/electrical_wiring_portfolio_1790690619985.jpg",
+          desc: "Electrical isolation cleaning, micro-dust suction, and carbon-free contact drying across appliances.",
+          completedAt: "July 2026",
+          location: "BTM Layout 2nd Stage",
+          metrics: "Dry Steam Safe · Child Safe",
+          tags: ["Contact Clean", "Dust Extraction", "Safety Checked"]
+        }
+      ]
+    };
+
     function App() {
       const [currentRoute, setCurrentRoute] = useState("home");
       const [city, setCity] = useState("Bengaluru");
@@ -122,6 +599,7 @@
       const [activeChatBooking, setActiveChatBooking] = useState(INITIAL_BOOKINGS[0]);
       const [isTyping, setIsTyping] = useState(false);
       const [chatInput, setChatInput] = useState("");
+      const [portfolioLightbox, setPortfolioLightbox] = useState(null);
       
       // Flow states
       const [aiQuery, setAiQuery] = useState("");
@@ -294,100 +772,120 @@
       };
 
       return (
-        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 pb-20 md:pb-0">
+        <div className="relative min-h-screen bg-[#070d1e] text-slate-100 selection:bg-cyan-900 selection:text-cyan-100">
+          {/* 3D CORPORATE TECHNOLOGY BACKGROUND */}
+          <Corporate3DBackground />
+
+          <div className="app-content min-h-screen flex flex-col pb-20 md:pb-0">
           
-          {/* HEADER */}
-          <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 shadow-xs">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
+          {/* HEADER (3-Zone Top Bar Contract with Glassmorphism) */}
+          <header className="sticky top-0 z-40 glass-header px-4 py-3 shadow-md">
+            <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
               
-              {/* Logo */}
-              <div onClick={() => setCurrentRoute("home")} className="flex items-center gap-2 cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-teal-500 flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
+              {/* Zone 1: Single Brand element */}
+              <div onClick={() => setCurrentRoute("home")} className="flex items-center gap-2 cursor-pointer group">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-cyan-600 to-teal-400 flex items-center justify-center text-white font-extrabold text-xl shadow-md border border-cyan-400/30 group-hover:scale-105 transition-transform">
                   🤝
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-slate-900 text-lg leading-tight tracking-tight">Jagan1</span>
-                    <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded">jagan1.com</span>
+                    <span className="font-extrabold text-white text-lg tracking-tight">Jagan1</span>
+                    <span className="text-[10px] text-cyan-300 font-semibold border border-cyan-400/20 bg-cyan-950/40 px-1.5 py-0.5 rounded">Corporate 3D</span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium">Domain: jagan1 • Direct worker payouts</p>
+                  <p className="text-[11px] text-slate-400 font-medium">Cooperative Gig Services Network</p>
                 </div>
               </div>
 
-              {/* Controls */}
-              <div className="flex items-center gap-2 sm:gap-4">
+              {/* Zone 2: Navigation Links */}
+              <nav className="hidden lg:flex items-center gap-5 text-xs font-semibold text-slate-300">
+                <button onClick={() => setCurrentRoute("home")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "home" ? "text-cyan-400 font-bold" : ""}`}>Home</button>
+                <button onClick={() => setCurrentRoute("services")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "services" ? "text-cyan-400 font-bold" : ""}`}>Services</button>
+                <button onClick={() => setCurrentRoute("ai_assistant")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "ai_assistant" ? "text-cyan-400 font-bold" : ""}`}>AI Assist</button>
+                <button onClick={() => setCurrentRoute("find_pros")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "find_pros" ? "text-cyan-400 font-bold" : ""}`}>Find Pros</button>
+                <button onClick={() => setCurrentRoute("nearby_pros")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "nearby_pros" ? "text-cyan-400 font-bold" : ""}`}>Nearby 3D</button>
+                <button onClick={() => setCurrentRoute("user_dashboard")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "user_dashboard" ? "text-cyan-400 font-bold" : ""}`}>Dashboard</button>
+                <button onClick={() => setCurrentRoute("my_bookings")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "my_bookings" ? "text-cyan-400 font-bold" : ""}`}>Bookings</button>
+                <button onClick={() => setCurrentRoute("help_support")} className={`hover:text-cyan-300 transition-colors ${currentRoute === "help_support" ? "text-cyan-400 font-bold" : ""}`}>Support</button>
+              </nav>
+
+              {/* Zone 3: Actions & Controls */}
+              <div className="flex items-center gap-2 sm:gap-3">
                 {/* City Picker */}
                 <div className="relative">
                   <select 
                     value={city} 
                     onChange={e => setCity(e.target.value)}
-                    className="bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="glass-card text-xs font-medium text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700/60 cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-400"
                   >
-                    {CITIES.map(c => <option key={c} value={c}>📍 {c}</option>)}
+                    {CITIES.map(c => <option key={c} value={c} className="bg-slate-900 text-slate-200">📍 {c}</option>)}
                   </select>
                 </div>
 
                 {/* Role Switcher */}
                 <button 
                   onClick={() => setRole(role === "CUSTOMER" ? "PRO" : role === "PRO" ? "ADMIN" : "CUSTOMER")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border transition flex items-center gap-1.5 ${
-                    role === "PRO" ? "bg-amber-100 text-amber-800 border-amber-300" :
-                    role === "ADMIN" ? "bg-rose-100 text-rose-800 border-rose-300" :
-                    "bg-blue-50 text-blue-700 border-blue-200"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 shadow-xs ${
+                    role === "PRO" ? "bg-amber-950/50 text-amber-300 border-amber-500/40 hover:bg-amber-900/50" :
+                    role === "ADMIN" ? "bg-rose-950/50 text-rose-300 border-rose-500/40 hover:bg-rose-900/50" :
+                    "bg-blue-950/50 text-cyan-300 border-cyan-500/40 hover:bg-blue-900/50"
                   }`}
+                  title="Toggle Workspace View"
                 >
-                  <span>{role === "PRO" ? "👷 Pro Mode" : role === "ADMIN" ? "🛡️ Admin" : "👤 Customer"}</span>
+                  <span>{role === "PRO" ? "👷 Pro" : role === "ADMIN" ? "🛡️ Admin" : "👤 Client"}</span>
                   <span className="text-[10px] opacity-60">⇄</span>
                 </button>
 
                 {/* Notifications */}
                 <button 
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition"
+                  className="relative p-2 text-slate-300 hover:text-cyan-300 glass-card rounded-lg border border-slate-700/60 transition"
+                  title="Notifications"
                 >
-                  <span className="text-lg">🔔</span>
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+                  <span className="text-base">🔔</span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cyan-400 rounded-full"></span>
                 </button>
 
-                {/* Profile Editor Button */}
+                {/* Auth / Profile Button */}
                 <button 
-                  onClick={() => setCurrentRoute("profile_editor")}
-                  className="w-8 h-8 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center hover:ring-2 hover:ring-blue-400 transition"
-                  title="Profile & Settings"
+                  onClick={() => setCurrentRoute(userName ? "profile_editor" : "login_signup")}
+                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-xs flex items-center gap-1.5 hover:from-blue-500 hover:to-cyan-500 shadow-md border border-cyan-400/30 transition"
+                  title="Account & Authentication"
                 >
-                  {role === "PRO" ? "👷" : userName.charAt(0)}
+                  <span>{role === "PRO" ? "👷" : "👤"}</span>
+                  <span className="hidden sm:inline">{userName ? userName.split(" ")[0] : "Sign In"}</span>
                 </button>
               </div>
 
             </div>
           </header>
 
-          {/* NOTIFICATION SHEET */}
+          {/* NOTIFICATION SHEET (Glassmorphism) */}
           {showNotifications && (
-            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex justify-end">
-              <div className="bg-white w-full max-w-sm h-full p-5 flex flex-col shadow-2xl">
-                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                  <h3 className="font-bold text-slate-900 text-base">Platform Notifications</h3>
-                  <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-slate-700 text-lg">✕</button>
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+              <div className="glass-card w-full max-w-sm h-full p-5 flex flex-col shadow-2xl border-l border-slate-700/60">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                  <h3 className="font-bold text-white text-base">Platform Notifications</h3>
+                  <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-white text-lg">✕</button>
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-3 py-4">
-                  <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                    <p className="text-xs font-bold text-blue-800">🛵 Professional On The Way</p>
-                    <p className="text-xs text-slate-600 mt-1">Ramesh Kumar is 1.2 km away for booking #{latestBookingId}.</p>
+                  <div className="p-3 bg-blue-950/60 rounded-xl border border-blue-500/30">
+                    <p className="text-xs font-bold text-cyan-300">🛵 Professional On The Way</p>
+                    <p className="text-xs text-slate-300 mt-1">Ramesh Kumar is 1.2 km away for booking #{latestBookingId}.</p>
                     <span className="text-[10px] text-slate-400 mt-1 block">5m ago</span>
                   </div>
-                  <div className="p-3 bg-teal-50 rounded-xl border border-teal-100">
-                    <p className="text-xs font-bold text-teal-800">💬 New Message from Ramesh</p>
-                    <p className="text-xs text-slate-600 mt-1">"I have packed high-grade CPVC couplers..."</p>
+                  <div className="p-3 bg-teal-950/60 rounded-xl border border-teal-500/30">
+                    <p className="text-xs font-bold text-teal-300">💬 New Message from Ramesh</p>
+                    <p className="text-xs text-slate-300 mt-1">"I have packed high-grade CPVC couplers..."</p>
                     <span className="text-[10px] text-slate-400 mt-1 block">10m ago</span>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <p className="text-xs font-bold text-slate-800">✅ Booking Confirmed</p>
-                    <p className="text-xs text-slate-600 mt-1">Emergency Plumbing assigned with zero markup.</p>
+                  <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-700/40">
+                    <p className="text-xs font-bold text-slate-200">✅ Booking Confirmed</p>
+                    <p className="text-xs text-slate-300 mt-1">Emergency Plumbing assigned with zero markup.</p>
                     <span className="text-[10px] text-slate-400 mt-1 block">15m ago</span>
                   </div>
                 </div>
-                <button onClick={() => setShowNotifications(false)} className="w-full py-2.5 bg-slate-100 font-semibold text-xs rounded-xl text-slate-700 hover:bg-slate-200">Close</button>
+                <button onClick={() => setShowNotifications(false)} className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl border border-slate-700/50">Close</button>
               </div>
             </div>
           )}
@@ -764,58 +1262,272 @@
               </div>
             )}
 
-            {/* 5. PROFESSIONAL PROFILE */}
+            {/* 5. PROFESSIONAL PROFILE & PORTFOLIO */}
             {currentRoute === "pro_profile" && (
-              <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <button onClick={() => setCurrentRoute("find_pros")} className="text-xs font-bold text-blue-600 hover:underline">← Back to Pros</button>
-                
-                <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
-                  <div className="w-16 h-16 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-2xl shadow-md">
-                    {selectedPro.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-slate-900">{selectedPro.name}</h2>
-                      <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Verified Member</span>
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium">{selectedPro.service} • {selectedPro.city}</p>
-                    <p className="text-xs font-bold text-amber-500 mt-1">★ {selectedPro.rating} ({selectedPro.reviews} community reviews)</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">About Member</h4>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{selectedPro.about}</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Experience</span>
-                    <p className="text-sm font-bold text-slate-800">{selectedPro.exp} Years</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Jobs Completed</span>
-                    <p className="text-sm font-bold text-slate-800">{selectedPro.jobs}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Base Visit</span>
-                    <p className="text-sm font-extrabold text-blue-700">₹{selectedPro.price}</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    onClick={() => { setActiveChatBooking(bookings[0]); setCurrentRoute("chat"); }}
-                    className="flex-1 py-3 text-xs font-bold border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50"
-                  >
-                    💬 Direct Chat
+              <div className="max-w-4xl mx-auto glass-card rounded-3xl border border-slate-700/60 shadow-2xl p-6 sm:p-8 space-y-8 text-slate-100">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+                  <button onClick={() => setCurrentRoute("find_pros")} className="text-xs font-bold text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1.5">
+                    <span>←</span>
+                    <span>Back to Professionals Directory</span>
                   </button>
+                  <span className="text-[11px] text-slate-400 font-semibold bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800">
+                    Cooperative Member ID: {selectedPro.id.toUpperCase()}
+                  </span>
+                </div>
+                
+                {/* Header profile info */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-600 to-teal-400 text-white font-extrabold flex items-center justify-center text-3xl shadow-xl border border-cyan-400/40">
+                      {selectedPro.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-white">{selectedPro.name}</h2>
+                        <span className="bg-cyan-950/80 text-cyan-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-cyan-500/40">
+                          ✓ Verified Member
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5">{selectedPro.service} Specialist • {selectedPro.city}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs font-semibold">
+                        <span className="text-amber-400">★ {selectedPro.rating}</span>
+                        <span className="text-slate-500">·</span>
+                        <span className="text-slate-400">{selectedPro.reviews} verified reviews</span>
+                        <span className="text-slate-500">·</span>
+                        <span className="text-emerald-400">98% on-time arrival</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 sm:self-center">
+                    <button 
+                      onClick={() => { setActiveChatBooking(bookings[0]); setCurrentRoute("chat"); }}
+                      className="px-4 py-2.5 text-xs font-bold glass-card hover:bg-slate-800 text-slate-200 border border-slate-700 rounded-xl transition"
+                    >
+                      💬 Direct Chat
+                    </button>
+                    <button 
+                      onClick={() => { setBookingService(selectedPro.service); setCurrentRoute("booking"); }}
+                      className="px-5 py-2.5 text-xs font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl shadow-lg border border-cyan-400/30 transition"
+                    >
+                      Book Professional
+                    </button>
+                  </div>
+                </div>
+
+                {/* About & Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2 glass-card p-4 rounded-2xl border border-slate-800 space-y-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Verified Member Bio</h4>
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{selectedPro.about}</p>
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {selectedPro.skills.map(s => (
+                        <span key={s} className="bg-slate-900/80 text-cyan-300 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-slate-800">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2.5">
+                    <div className="glass-card p-3 rounded-xl border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold">Field Experience</span>
+                      <p className="text-lg font-extrabold text-white tabular-nums">{selectedPro.exp} Years Active</p>
+                    </div>
+                    <div className="glass-card p-3 rounded-xl border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold">Total Completed Jobs</span>
+                      <p className="text-lg font-extrabold text-cyan-400 tabular-nums">{selectedPro.jobs}+ Dispatches</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PORTFOLIO GALLERY SECTION */}
+                <div className="space-y-4 pt-4 border-t border-slate-800">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📸</span>
+                        <h3 className="text-base sm:text-lg font-extrabold text-white">Verified Work Portfolio Gallery</h3>
+                        <span className="bg-cyan-950/80 text-cyan-300 text-[10px] font-bold px-2 py-0.5 rounded border border-cyan-500/30">
+                          High Resolution
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Photographic proof of previous installations, wiring standards, and precision restoration work completed by {selectedPro.name}.
+                      </p>
+                    </div>
+                    <span className="text-xs text-slate-400">Click any image to inspect full details</span>
+                  </div>
+
+                  {/* Portfolio Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(PORTFOLIO_GALLERY[selectedPro.service] || PORTFOLIO_GALLERY["Plumbing"]).map(item => (
+                      <div 
+                        key={item.id}
+                        onClick={() => setPortfolioLightbox(item)}
+                        className="glass-card glass-card-hover rounded-2xl border border-slate-700/60 overflow-hidden cursor-pointer group flex flex-col justify-between"
+                      >
+                        {/* Image Preview with Hover Overlay */}
+                        <div className="relative aspect-[4/3] bg-slate-900 overflow-hidden">
+                          <img 
+                            src={item.image} 
+                            alt={item.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              // Elegant fallback container if image fails
+                              e.target.style.display = 'none';
+                              e.target.parentElement.classList.add('flex', 'items-center', 'justify-center', 'p-4', 'bg-gradient-to-br', 'from-slate-900', 'to-blue-950');
+                              e.target.parentElement.innerHTML = `<div class="text-center"><span class="text-3xl">🔧</span><p class="text-xs font-bold text-cyan-300 mt-2">${item.title}</p></div>`;
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                          
+                          {/* Badges on image */}
+                          <div className="absolute top-2.5 left-2.5">
+                            <span className="bg-slate-950/80 backdrop-blur-md text-cyan-300 text-[10px] font-bold px-2 py-0.5 rounded border border-cyan-500/30">
+                              {item.category}
+                            </span>
+                          </div>
+
+                          <div className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="bg-cyan-500/90 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1">
+                              <span>🔍</span>
+                              <span>Inspect</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Info */}
+                        <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
+                              {item.title}
+                            </h4>
+                            <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                              {item.desc}
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-800 space-y-1.5">
+                            <p className="text-[11px] font-semibold text-cyan-300 flex items-center gap-1">
+                              <span>✓</span>
+                              <span>{item.metrics}</span>
+                            </p>
+                            <div className="flex items-center justify-between text-[10px] text-slate-500">
+                              <span>📍 {item.location}</span>
+                              <span>{item.completedAt}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cooperative Warranty Guarantee Footer */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/60 to-cyan-950/40 border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🛡️</span>
+                    <div>
+                      <p className="font-bold text-white">Cooperative Quality & Workmanship Guarantee</p>
+                      <p className="text-slate-400 text-[11px]">All portfolio work is covered by a 30-day rework guarantee backed by our mutual member fund.</p>
+                    </div>
+                  </div>
                   <button 
                     onClick={() => { setBookingService(selectedPro.service); setCurrentRoute("booking"); }}
-                    className="flex-1 py-3 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md"
+                    className="w-full sm:w-auto px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl shadow-md transition whitespace-nowrap"
                   >
-                    Book Service
+                    Request Similar Work →
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* LIGHTBOX MODAL FOR PORTFOLIO SHOWCASE */}
+            {portfolioLightbox && (
+              <div 
+                className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+                onClick={() => setPortfolioLightbox(null)}
+              >
+                <div 
+                  className="max-w-3xl w-full glass-card border border-cyan-500/40 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-100 animate-fadeIn"
+                  onClick={e => e.stopPropagation()}
+                >
+                  {/* Lightbox Header */}
+                  <div className="flex justify-between items-center px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                      <h3 className="font-bold text-sm text-white">{portfolioLightbox.title}</h3>
+                      <span className="text-[10px] text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30">
+                        {portfolioLightbox.category}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => setPortfolioLightbox(null)}
+                      className="text-slate-400 hover:text-white text-lg p-1 transition"
+                      title="Close (Esc)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Lightbox Image Preview */}
+                  <div className="relative aspect-[16/10] bg-slate-950 overflow-hidden flex items-center justify-center">
+                    <img 
+                      src={portfolioLightbox.image} 
+                      alt={portfolioLightbox.title}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-cyan-500/30 text-xs text-slate-200">
+                      <span className="font-bold text-cyan-300">Verified Work:</span> {selectedPro.name} ({selectedPro.service})
+                    </div>
+                  </div>
+
+                  {/* Lightbox Details */}
+                  <div className="p-5 space-y-4 bg-slate-950/70">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Technical Overview & Execution</span>
+                        <span className="text-xs text-slate-400">📍 {portfolioLightbox.location} • {portfolioLightbox.completedAt}</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        {portfolioLightbox.desc}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] text-slate-400 font-semibold mr-1">Standards:</span>
+                        {portfolioLightbox.tags.map(t => (
+                          <span key={t} className="bg-slate-900 text-cyan-300 text-[10px] font-semibold px-2.5 py-1 rounded-md border border-slate-800">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setPortfolioLightbox(null)}
+                          className="px-4 py-2 rounded-xl glass-card text-slate-300 text-xs font-semibold hover:text-white border border-slate-700"
+                        >
+                          Close
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setPortfolioLightbox(null);
+                            setBookingService(selectedPro.service);
+                            setBookingProblem(`Request similar work as seen in portfolio: "${portfolioLightbox.title}"`);
+                            setCurrentRoute("booking");
+                          }}
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold shadow-md border border-cyan-400/30"
+                        >
+                          Book Similar Installation →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1274,7 +1986,327 @@
               </div>
             )}
 
-            {/* 12. PROFILE EDITOR (CUSTOMER & PRO) */}
+            {/* 12. LOGIN / SIGN UP SCREEN */}
+            {currentRoute === "login_signup" && (
+              <div className="max-w-md mx-auto space-y-6">
+                <div className="glass-card p-6 sm:p-8 rounded-3xl border border-slate-700/60 shadow-2xl space-y-6">
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white text-2xl mx-auto shadow-lg border border-cyan-400/40">
+                      🛡️
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-white">Welcome to Jagan1 Corporate</h2>
+                    <p className="text-xs text-slate-400">Cooperative credentials for clients & verified service partners</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">Corporate or Mobile Number</label>
+                      <input 
+                        type="text" 
+                        defaultValue={userPhone}
+                        className="w-full p-3 text-xs sm:text-sm glass-input rounded-xl font-medium focus:ring-1 focus:ring-cyan-400"
+                        placeholder="+91 98450 00000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">Account Role</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button 
+                          onClick={() => setRole("CUSTOMER")}
+                          className={`p-2.5 rounded-xl text-xs font-bold border transition ${role === "CUSTOMER" ? "bg-cyan-950/70 text-cyan-300 border-cyan-400/50 shadow-xs" : "bg-slate-900/60 text-slate-400 border-slate-800"}`}
+                        >
+                          👤 Consumer / Business
+                        </button>
+                        <button 
+                          onClick={() => setRole("PRO")}
+                          className={`p-2.5 rounded-xl text-xs font-bold border transition ${role === "PRO" ? "bg-amber-950/70 text-amber-300 border-amber-400/50 shadow-xs" : "bg-slate-900/60 text-slate-400 border-slate-800"}`}
+                        >
+                          👷 Service Partner
+                        </button>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setUserName("Aditi Sharma");
+                        setCurrentRoute(role === "PRO" ? "pro_dashboard" : "user_dashboard");
+                      }}
+                      className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg border border-cyan-400/30 transition flex items-center justify-center gap-2"
+                    >
+                      <span>Secure Single Sign-On</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-center text-slate-400">
+                    Protected by 256-bit cooperative escrow encryption & OTP validation.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 13. USER DASHBOARD OVERVIEW */}
+            {currentRoute === "user_dashboard" && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-white">Corporate Client Dashboard</h2>
+                    <p className="text-xs text-slate-400">Manage active service dispatches, cooperative dividends & verified bookings</p>
+                  </div>
+                  <button 
+                    onClick={() => setCurrentRoute("services")}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-bold shadow-md hover:from-blue-500 hover:to-cyan-500 transition"
+                  >
+                    + Book New Service
+                  </button>
+                </div>
+
+                {/* Dashboard Metrics */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  {[
+                    { title: "Active Dispatches", val: bookings.filter(b => b.status !== "Completed").length, icon: "🛵", note: "Real-time tracking" },
+                    { title: "Completed Services", val: bookings.filter(b => b.status === "Completed").length + 6, icon: "✅", note: "Verified cooperative pros" },
+                    { title: "Platform Savings", val: "₹1,420", icon: "💰", note: "Zero surge commission" },
+                    { title: "Trust Score", val: "100%", icon: "🛡️", note: "Aadhaar verified" }
+                  ].map((m, idx) => (
+                    <div key={idx} className="glass-card glass-card-hover p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+                      <div className="flex justify-between items-center text-slate-400 text-xs font-semibold">
+                        <span>{m.title}</span>
+                        <span className="text-base">{m.icon}</span>
+                      </div>
+                      <p className="text-2xl font-extrabold text-cyan-400 mt-2 tabular-nums">{m.val}</p>
+                      <p className="text-[11px] text-slate-400 mt-1">{m.note}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Live Tracking Quick Widget */}
+                {bookings.length > 0 && (
+                  <div className="glass-card p-5 rounded-2xl border border-cyan-500/30 shadow-xl space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <h3 className="font-bold text-sm text-white">Active Service: {bookings[0].service} (#{bookings[0].id})</h3>
+                      </div>
+                      <span className="text-xs font-bold text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+                        {bookings[0].status}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 text-xs text-slate-300">
+                      <div>
+                        <p><strong className="text-white">Professional:</strong> {bookings[0].proName} ({bookings[0].service})</p>
+                        <p className="text-slate-400 text-[11px]">{bookings[0].address}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => { setTrackingBooking(bookings[0]); setCurrentRoute("track_service"); }}
+                          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs"
+                        >
+                          View 3D Radar
+                        </button>
+                        <button 
+                          onClick={() => { setActiveChatBooking(bookings[0]); setCurrentRoute("chat"); }}
+                          className="px-3 py-1.5 rounded-lg glass-card text-cyan-300 hover:text-white font-semibold text-xs border border-slate-700"
+                        >
+                          Direct Chat
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 14. NEARBY 3D SERVICE PROVIDERS */}
+            {currentRoute === "nearby_pros" && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-white">Nearby Verified Professionals</h2>
+                    <p className="text-xs text-slate-400">Hyperlocal real-time node cluster across {city}</p>
+                  </div>
+                  <button 
+                    onClick={() => setCurrentRoute("find_pros")}
+                    className="glass-card px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-300 border border-slate-700 hover:text-white"
+                  >
+                    View List Mode →
+                  </button>
+                </div>
+
+                <div className="glass-card p-6 rounded-3xl border border-cyan-500/30 relative overflow-hidden space-y-4">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-cyan-300 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                      Spatial GPS Dispatch Active
+                    </span>
+                    <span className="text-slate-400">Radius: 5.0 km • Latency: &lt; 20ms</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    {PROFESSIONALS.filter(p => p.city === city).map(p => (
+                      <div key={p.id} className="glass-card glass-card-hover p-4 rounded-2xl border border-slate-700/60 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
+                                {p.name.charAt(0)}
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-sm text-white">{p.name}</h4>
+                                <p className="text-[11px] text-cyan-300">{p.service}</p>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">★ {p.rating}</span>
+                          </div>
+                          <div className="mt-3 text-xs text-slate-300 space-y-1">
+                            <p className="text-[11px] text-slate-400">📍 {p.area}</p>
+                            <p className="font-semibold text-cyan-300">🛵 {p.distance} km away • {Math.round(p.distance * 10)} min ETA</p>
+                          </div>
+                        </div>
+                        <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
+                          <span className="text-xs font-bold text-white">₹{p.price} <span className="text-[10px] text-slate-400 font-normal">base</span></span>
+                          <button 
+                            onClick={() => { setSelectedPro(p); setBookingService(p.service); setCurrentRoute("booking"); }}
+                            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition"
+                          >
+                            Instant Book
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 15. PAYMENT ESCROW GATEWAY */}
+            {currentRoute === "payment" && (
+              <div className="max-w-xl mx-auto space-y-6">
+                <div className="glass-card p-6 sm:p-8 rounded-3xl border border-slate-700/60 shadow-2xl space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-white">Cooperative Escrow Checkout</h2>
+                      <p className="text-xs text-slate-400">Payment released to professional only after customer sign-off</p>
+                    </div>
+                    <span className="text-2xl">🔒</span>
+                  </div>
+
+                  <div className="p-4 bg-slate-900/70 rounded-2xl border border-slate-800 space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Service: {bookingService.toUpperCase()}</span>
+                      <span className="font-bold text-white">₹{selectedPro ? selectedPro.price : 299}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Cooperative Safety & Insurance</span>
+                      <span className="text-cyan-400">FREE</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Platform Commission</span>
+                      <span className="text-emerald-400 font-bold">₹0 (Worker Owned)</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-700 flex justify-between text-sm font-extrabold text-white">
+                      <span>Total Escrow Amount</span>
+                      <span className="text-cyan-400">₹{selectedPro ? selectedPro.price + 29 : 328}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-slate-300">Select Payment Method</p>
+                    {["UPI Instant (GPay / PhonePe / Paytm)", "Corporate NetBanking / NEFT", "Credit / Debit Card (Visa / RuPay)", "Cash on Completion"].map((m, idx) => (
+                      <label key={idx} className="flex items-center gap-3 p-3 rounded-xl glass-card border border-slate-800 cursor-pointer hover:border-cyan-500/40 text-xs font-semibold text-slate-200">
+                        <input type="radio" name="paymentMethod" defaultChecked={idx === 0} className="text-cyan-500" />
+                        <span>{m}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      confirmBooking();
+                    }}
+                    className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-sm rounded-xl shadow-lg border border-teal-400/30 transition flex items-center justify-center gap-2"
+                  >
+                    <span>Authorize Escrow & Confirm Booking</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 16. RATINGS & REVIEWS DIRECTORY */}
+            {currentRoute === "reviews" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white">Ratings & Customer Reviews</h2>
+                  <p className="text-xs text-slate-400">Verified feedback from community households and enterprise facilities</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { author: "Sunita Rao", pro: "Ramesh Kumar", service: "Plumbing", rating: 5, time: "Yesterday", text: "Ramesh arrived in 15 minutes with complete tools. Fixed the kitchen under-sink crack without any mess. Fair cooperative pricing!" },
+                    { author: "Kiran Deshmukh", pro: "Rajesh Gowda", service: "Electrical", rating: 5, time: "2 days ago", text: "MCB tripping was diagnosed accurately using digital multimeter. Courteous and transparent billing." },
+                    { author: "Pooja Hegde", pro: "Priya Sharma", service: "Deep Cleaning", rating: 5, time: "3 days ago", text: "Exceptional team effort. Kitchen tiles and bathroom descaling looks brand new. Highly recommended!" }
+                  ].map((r, idx) => (
+                    <div key={idx} className="glass-card glass-card-hover p-5 rounded-2xl border border-slate-700/60 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-white text-sm">{r.author}</h4>
+                          <p className="text-[11px] text-cyan-300">Reviewed {r.pro} ({r.service})</p>
+                        </div>
+                        <span className="text-xs font-bold text-amber-400">{"★".repeat(r.rating)}</span>
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed italic">"{r.text}"</p>
+                      <span className="text-[10px] text-slate-500 block pt-2 border-t border-slate-800">{r.time} • Verified Job</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 17. 24x7 HELP & COOPERATIVE SUPPORT */}
+            {currentRoute === "help_support" && (
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white">Help & Cooperative Support</h2>
+                  <p className="text-xs text-slate-400">Direct human assistance, emergency safety team, and service guarantees</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="glass-card p-4 rounded-2xl border border-red-500/30 shadow-lg">
+                    <span className="text-2xl">🚨</span>
+                    <h3 className="font-bold text-white text-sm mt-2">Emergency Hotline</h3>
+                    <p className="text-xs text-slate-400 mt-1">Gas leak, water flood, electrical short-circuit</p>
+                    <p className="font-mono text-cyan-300 text-xs font-bold mt-2">1800-420-GIGS (Toll Free)</p>
+                  </div>
+                  <div className="glass-card p-4 rounded-2xl border border-cyan-500/30 shadow-lg">
+                    <span className="text-2xl">💬</span>
+                    <h3 className="font-bold text-white text-sm mt-2">AI Diagnostic Assist</h3>
+                    <p className="text-xs text-slate-400 mt-1">Instant trouble analysis and dispatch advice</p>
+                    <button onClick={() => setCurrentRoute("ai_assistant")} className="text-xs font-bold text-cyan-300 mt-2 hover:underline">Launch Assist →</button>
+                  </div>
+                  <div className="glass-card p-4 rounded-2xl border border-teal-500/30 shadow-lg">
+                    <span className="text-2xl">🛡️</span>
+                    <h3 className="font-bold text-white text-sm mt-2">Cooperative Guarantee</h3>
+                    <p className="text-xs text-slate-400 mt-1">30-day rework warranty on all certified tasks</p>
+                    <span className="text-[11px] text-emerald-400 font-semibold mt-2 block">100% Protected</span>
+                  </div>
+                </div>
+
+                <div className="glass-card p-6 rounded-3xl border border-slate-700/60 space-y-4">
+                  <h3 className="font-bold text-white text-base">Frequently Asked Questions</h3>
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                      <p className="font-bold text-white">How does the worker cooperative model benefit customers?</p>
+                      <p className="text-slate-400 mt-1">Workers keep 95% of fees without middleman surge pricing. This results in experienced, certified professionals who take genuine pride in their workmanship.</p>
+                    </div>
+                    <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                      <p className="font-bold text-white">How is payment security handled?</p>
+                      <p className="text-slate-400 mt-1">Funds remain in escrow and are only disbursed after you verify satisfactory task completion with your OTP.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 18. PROFILE EDITOR (CUSTOMER & PRO) */}
             {currentRoute === "profile_editor" && (
               <div className="max-w-2xl mx-auto space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
@@ -1490,13 +2522,13 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION (MOBILE) */}
-          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex justify-around items-center py-2 px-3 shadow-lg md:hidden">
+          {/* BOTTOM NAVIGATION (MOBILE - GLASSMORPHISM) */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-slate-800 flex justify-around items-center py-2 px-3 shadow-2xl md:hidden">
             {[
               { id: "home", label: "Home", icon: "🏠" },
               { id: "services", label: "Services", icon: "🔧" },
               { id: "ai_assistant", label: "AI Assist", icon: "✨" },
-              { id: "chat", label: "Chat", icon: "💬" },
+              { id: "nearby_pros", label: "Nearby", icon: "📍" },
               { id: "my_bookings", label: "Bookings", icon: "📋" },
               { id: "profile_editor", label: "Profile", icon: "👤" }
             ].map(tab => (
@@ -1504,7 +2536,7 @@
                 key={tab.id}
                 onClick={() => setCurrentRoute(tab.id)}
                 className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold transition ${
-                  currentRoute === tab.id ? "text-blue-600 font-bold" : "text-slate-400 hover:text-slate-600"
+                  currentRoute === tab.id ? "text-cyan-400 font-bold" : "text-slate-400 hover:text-slate-200"
                 }`}
               >
                 <span className="text-base">{tab.icon}</span>
@@ -1513,6 +2545,7 @@
             ))}
           </nav>
 
+          </div>
         </div>
       );
     }
