@@ -4,9 +4,12 @@
   "description": "Connects customers with nearby verified service professionals with AI diagnosis, booking, and real-time chat.",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
+    "dev": "node server.ts",
+    "start": "node server.ts",
     "build": "node -e \"console.log('Build successful')\""
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "keywords": [],
   "author": "",

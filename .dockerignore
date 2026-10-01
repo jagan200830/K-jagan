@@ -1,0 +1,7 @@
+.git
+.gradle
+.kotlin
+build
+.build-outputs
+debug.keystore*
+*.log

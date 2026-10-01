@@ -38,7 +38,7 @@ fun ProfileEditorScreen(
   var customerPhone by remember { mutableStateOf(repository.activeUserPhone) }
   var customerAddress by remember { mutableStateOf(repository.activeUserAddress) }
   var selectedAddressTag by remember { mutableStateOf("Home") }
-  var emergencyContact by remember { mutableStateOf("+91 94480 12890") }
+  var emergencyContact by remember { mutableStateOf("+91 00000 00009") }
   var specialInstructions by remember { mutableStateOf("Ring bell twice, gate passcode 1928") }
 
   // Service professional profile state
@@ -155,7 +155,7 @@ fun ProfileEditorScreen(
                 // Update customer in repository
                 repository.updateCustomerProfile(
                   name = customerName.ifBlank { "Aditi Sharma" },
-                  phone = customerPhone.ifBlank { "+91 98200 44521" },
+                  phone = customerPhone.ifBlank { "+91 00000 00000" },
                   address = customerAddress.ifBlank { "#42, 3rd Cross, 7th Main, Koramangala 4th Block, ${repository.selectedCity}" }
                 )
                 saveSuccessMessage = "Customer profile and primary service address saved successfully! Your default booking details have been refreshed."
@@ -341,7 +341,7 @@ fun ProfileEditorScreen(
                 value = customerPhone,
                 onValueChange = { customerPhone = it },
                 label = { Text("Mobile Phone Number") },
-                placeholder = { Text("+91 98200 44521") },
+                placeholder = { Text("+91 00000 00000") },
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = BrandPrimary) },
                 supportingText = {
                   Text("Cooperative masked routing enabled for privacy during service calls", fontSize = 10.sp, color = Slate500)
@@ -359,7 +359,7 @@ fun ProfileEditorScreen(
                 value = emergencyContact,
                 onValueChange = { emergencyContact = it },
                 label = { Text("Family Emergency Contact Number") },
-                placeholder = { Text("+91 94480 12890") },
+                placeholder = { Text("+91 00000 00009") },
                 leadingIcon = { Icon(Icons.Default.Shield, contentDescription = null, tint = Green600) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),

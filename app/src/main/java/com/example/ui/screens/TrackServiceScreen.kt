@@ -392,7 +392,7 @@ fun TrackServiceScreen(
       onDismissRequest = { showCallDialog = false },
       title = { Text("Call ${booking?.professionalName}") },
       text = {
-        Text("Cooperative masked dialer connects you to ${pro?.phone ?: "+91 98450 21345"} with zero call charges.")
+        Text("Cooperative masked dialer connects you to ${pro?.phone ?: "+91 00000 00001"} with zero call charges.")
       },
       confirmButton = {
         Button(onClick = { showCallDialog = false }) {

@@ -22,7 +22,7 @@ class GigRepository(private val appScope: CoroutineScope) {
 
   var selectedCity by mutableStateOf("Bengaluru")
   var activeRole by mutableStateOf("CUSTOMER") // "CUSTOMER", "PROFESSIONAL", "ADMIN"
-  var activeUserPhone by mutableStateOf("+91 98200 44521")
+  var activeUserPhone by mutableStateOf("+91 00000 00000")
   var activeUserName by mutableStateOf("Aditi Sharma")
   var activeUserAddress by mutableStateOf("#42, 3rd Cross, 7th Main, Koramangala 4th Block, Bengaluru")
 

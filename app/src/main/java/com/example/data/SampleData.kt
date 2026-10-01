@@ -364,7 +364,7 @@ object SampleData {
       serviceArea = "Koramangala, HSR Layout, BTM Layout",
       workingHours = "7:00 AM - 9:00 PM (Emergency 24x7)",
       languages = listOf("Kannada", "Hindi", "English"),
-      phone = "+91 98450 21345",
+      phone = "+91 00000 00014",
       about = "Cooperative member for 3 years. Certified master plumber with complete tools for instant leak stoppage.",
       initialAvatarColor = 0xFF1E40AF
     ),
@@ -384,7 +384,7 @@ object SampleData {
       serviceArea = "Indiranagar, Domlur, Ulsoor",
       workingHours = "8:00 AM - 8:00 PM",
       languages = listOf("Kannada", "Telugu", "Hindi"),
-      phone = "+91 97412 88921",
+      phone = "+91 00000 00008",
       about = "Punctual, friendly and transparent in quotation. Free water pressure inspection included.",
       initialAvatarColor = 0xFF0D9488
     ),
@@ -404,7 +404,7 @@ object SampleData {
       serviceArea = "Jayanagar, JP Nagar, Banashankari",
       workingHours = "24x7 Emergency Service",
       languages = listOf("Kannada", "English"),
-      phone = "+91 99801 34112",
+      phone = "+91 00000 00020",
       about = "Govt certified wireman license holder. Arrives with multimeter, insulated gear and safety fuses.",
       initialAvatarColor = 0xFFD97706
     ),
@@ -424,7 +424,7 @@ object SampleData {
       serviceArea = "Whitefield, Marathahalli",
       workingHours = "9:00 AM - 7:30 PM",
       languages = listOf("Kannada", "Hindi"),
-      phone = "+91 98863 56123",
+      phone = "+91 00000 00018",
       about = "Detail-oriented technician specializing in neat cable concealment and smart home switches.",
       initialAvatarColor = 0xFF2563EB
     ),
@@ -444,7 +444,7 @@ object SampleData {
       serviceArea = "Malleshwaram, Rajajinagar, Yeshwanthpur",
       workingHours = "8:30 AM - 7:00 PM",
       languages = listOf("Kannada", "English"),
-      phone = "+91 94480 77123",
+      phone = "+91 00000 00001",
       about = "Third-generation carpenter with modern precision cutting tools. Clean and zero-mess guarantee.",
       initialAvatarColor = 0xFF7C2D12
     ),
@@ -464,7 +464,7 @@ object SampleData {
       serviceArea = "Koramangala, Bellandur, Sarjapur Road",
       workingHours = "8:00 AM - 8:30 PM",
       languages = listOf("Tamil", "Kannada", "English", "Hindi"),
-      phone = "+91 98401 99234",
+      phone = "+91 00000 00012",
       about = "Certified HVAC technician. Guaranteed 100% cooling restoration with digital temperature probe testing.",
       initialAvatarColor = 0xFF0284C7
     ),
@@ -484,7 +484,7 @@ object SampleData {
       serviceArea = "Hebbal, RT Nagar, Yelahanka",
       workingHours = "9:00 AM - 6:00 PM",
       languages = listOf("Kannada", "Hindi"),
-      phone = "+91 96112 44331",
+      phone = "+91 00000 00004",
       about = "Expert in LG, Samsung, Whirlpool and Bosch systems. 90-day warranty on all replacement components.",
       initialAvatarColor = 0xFF4F46E5
     ),
@@ -504,7 +504,7 @@ object SampleData {
       serviceArea = "Electronic City, HSR Layout",
       workingHours = "8:00 AM - 6:00 PM",
       languages = listOf("Hindi", "English", "Kannada"),
-      phone = "+91 98110 55432",
+      phone = "+91 00000 00010",
       about = "Leads an all-women cooperative cleaning crew. Uses non-toxic German eco-cleaners.",
       initialAvatarColor = 0xFF059669
     ),
@@ -524,7 +524,7 @@ object SampleData {
       serviceArea = "Frazer Town, Benson Town, Cox Town",
       workingHours = "8:00 AM - 7:00 PM",
       languages = listOf("Kannada", "Hindi"),
-      phone = "+91 97405 66781",
+      phone = "+91 00000 00007",
       about = "Safe treatments safe for pets and infants. Free re-visit guarantee within 45 days.",
       initialAvatarColor = 0xFF15803D
     ),
@@ -544,7 +544,7 @@ object SampleData {
       serviceArea = "Central Bengaluru (within 10km)",
       workingHours = "7:00 AM - 11:00 PM",
       languages = listOf("Kannada", "English", "Hindi"),
-      phone = "+91 99002 11984",
+      phone = "+91 00000 00019",
       about = "Community delivery lead. Known for lightning-fast 20 minute response in Koramangala and Indiranagar.",
       initialAvatarColor = 0xFFE11D48
     ),
@@ -564,7 +564,7 @@ object SampleData {
       serviceArea = "Basavanagudi, Jayanagar, Vijayanagar",
       workingHours = "7:00 AM - 8:00 PM",
       languages = listOf("Kannada", "English", "Telugu"),
-      phone = "+91 94801 33290",
+      phone = "+91 00000 00003",
       about = "Former healthcare paramedic dedicated to senior care. Patient, respectful, and certified in first aid.",
       initialAvatarColor = 0xFF7E22CE
     ),
@@ -586,7 +586,7 @@ object SampleData {
       serviceArea = "Cowl Bazaar, Gandhi Nagar, Cantonment",
       workingHours = "7:00 AM - 8:30 PM",
       languages = listOf("Kannada", "Telugu", "Hindi"),
-      phone = "+91 98442 88120",
+      phone = "+91 00000 00013",
       about = "Ballari cooperative member. Well versed with local groundwater minerals and anti-scaling plumbing.",
       initialAvatarColor = 0xFF0D9488
     ),
@@ -606,7 +606,7 @@ object SampleData {
       serviceArea = "Infantry Road, Parvathi Nagar",
       workingHours = "8:00 AM - 9:00 PM",
       languages = listOf("Kannada", "Telugu"),
-      phone = "+91 99860 12876",
+      phone = "+91 00000 00021",
       about = "Expert in summer power surge protection and heavy duty pump starter circuits.",
       initialAvatarColor = 0xFFD97706
     ),
@@ -626,7 +626,7 @@ object SampleData {
       serviceArea = "All Ballari Town limits",
       workingHours = "8:00 AM - 8:00 PM",
       languages = listOf("Kannada", "Hindi"),
-      phone = "+91 97312 99401",
+      phone = "+91 00000 00006",
       about = "Specialist in high-temperature performance optimization for Ballari summers.",
       initialAvatarColor = 0xFF0284C7
     ),
@@ -646,7 +646,7 @@ object SampleData {
       serviceArea = "Radio Park, S.N. Pet",
       workingHours = "7:00 AM - 7:00 PM",
       languages = listOf("Kannada", "Telugu"),
-      phone = "+91 98459 33011",
+      phone = "+91 00000 00016",
       about = "Warm, trustworthy home cook. Prepares hygienic and authentic meals with traditional taste.",
       initialAvatarColor = 0xFFBE185D
     ),
@@ -668,7 +668,7 @@ object SampleData {
       serviceArea = "Gokulam, Jayalakshmipuram, Saraswathipuram",
       workingHours = "7:30 AM - 8:00 PM",
       languages = listOf("Kannada", "English"),
-      phone = "+91 98801 77234",
+      phone = "+91 00000 00017",
       about = "Specialist in solar water line plumbing and high pressure bathroom showers.",
       initialAvatarColor = 0xFF1E40AF
     ),
@@ -688,7 +688,7 @@ object SampleData {
       serviceArea = "Kuvempunagar, Vijayanagar, Ramakrishnanagar",
       workingHours = "8:30 AM - 7:30 PM",
       languages = listOf("Kannada", "English"),
-      phone = "+91 94492 44109",
+      phone = "+91 00000 00002",
       about = "Mysuru artisan known for impeccable woodwork and durable furniture repairs.",
       initialAvatarColor = 0xFF7C2D12
     ),
@@ -708,7 +708,7 @@ object SampleData {
       serviceArea = "Siddhartha Layout, Alanahalli, Bannimantap",
       workingHours = "8:00 AM - 5:00 PM",
       languages = listOf("Kannada", "English"),
-      phone = "+91 96201 88562",
+      phone = "+91 00000 00005",
       about = "Horticulture graduate helping families grow fresh pesticide-free greens and lush terrace gardens.",
       initialAvatarColor = 0xFF15803D
     ),
@@ -730,7 +730,7 @@ object SampleData {
       serviceArea = "SS Puram, Ashok Nagar, Kyatsandra",
       workingHours = "8:00 AM - 8:30 PM",
       languages = listOf("Kannada", "Hindi"),
-      phone = "+91 97430 11200",
+      phone = "+91 00000 00009",
       about = "Dependable local electrician with quick emergency response throughout Tumakuru city.",
       initialAvatarColor = 0xFFD97706
     ),
@@ -750,7 +750,7 @@ object SampleData {
       serviceArea = "Batawadi, SIT Extension, Mandipet",
       workingHours = "8:30 AM - 7:30 PM",
       languages = listOf("Kannada", "English"),
-      phone = "+91 98455 66129",
+      phone = "+91 00000 00015",
       about = "Carries original certified filters. Free water purity TDS check before and after service.",
       initialAvatarColor = 0xFF0284C7
     )
@@ -828,7 +828,7 @@ object SampleData {
     Booking(
       id = "BK-8421",
       customerName = "Aditi Sharma",
-      customerPhone = "+91 98200 44521",
+      customerPhone = "+91 00000 00011",
       professionalId = "pro_ramesh",
       professionalName = "Ramesh Kumar",
       serviceId = "plumbing",
@@ -853,7 +853,7 @@ object SampleData {
     Booking(
       id = "BK-8419",
       customerName = "Aditi Sharma",
-      customerPhone = "+91 98200 44521",
+      customerPhone = "+91 00000 00011",
       professionalId = "pro_rajesh",
       professionalName = "Rajesh Gowda",
       serviceId = "electrical",
@@ -878,7 +878,7 @@ object SampleData {
     Booking(
       id = "BK-8390",
       customerName = "Aditi Sharma",
-      customerPhone = "+91 98200 44521",
+      customerPhone = "+91 00000 00011",
       professionalId = "pro_priya",
       professionalName = "Priya Sharma",
       serviceId = "cleaning",
